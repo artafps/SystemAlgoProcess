@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
+import { Charts } from "./charts";
 
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -19,7 +20,7 @@ const SRTChart = () => {
   });
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
-
+  console.log(processStats);
   useEffect(() => {
     const processes = [
       { id: "P1", arrival: 0, burst: 8 },
@@ -168,7 +169,7 @@ const SRTChart = () => {
           type="scatter"
         />
       </Card>
-
+      <Charts data={processStats}/>
       {/* جدول WT و TAT */}
       <Card style={{ width: "100%" }}>
         <CardHeader>
