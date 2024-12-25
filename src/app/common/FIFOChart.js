@@ -13,7 +13,7 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const FCFSChart = () => {
+const FIFOChart = () => {
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -29,63 +29,60 @@ const FCFSChart = () => {
       { id: "P5", arrival: 6, burst: 5 },
     ];
 
-    const timeline = [];
+    // مرتب‌سازی فرآیندها بر اساس زمان ورود
+    processes.sort((a, b) => a.arrival - b.arrival);
+
     let currentTime = 0;
-
-    const completionTimes = {};
-
-    // شبیه‌سازی الگوریتم FCFS
-    processes.sort((a, b) => a.arrival - b.arrival); // Sort by arrival time
+    const completionTimes = [];
+    const timeline = [];
 
     processes.forEach((process) => {
-      if (currentTime < process.arrival) {
-        currentTime = process.arrival;
-      }
+      // فرآیند را به خط زمان اضافه کنید
       timeline.push({
         time: currentTime,
         process: process.id,
       });
-      currentTime += process.burst;
-      completionTimes[process.id] = currentTime;
+
+      // محاسبه زمان تکمیل فرآیند
+      currentTime = Math.max(currentTime, process.arrival) + process.burst;
+      completionTimes.push({
+        id: process.id,
+        completion: currentTime,
+      });
     });
+
     // محاسبه WT و TAT
-    const stats = processes.map((p) => {
-      const completionTime = completionTimes[p.id];
-      const tat = completionTime - p.arrival; // Turnaround Time
-      const wt = tat - p.burst; // Waiting Time
+    const stats = processes.map((process) => {
+      const completionTime = completionTimes.find(
+        (c) => c.id === process.id
+      ).completion;
+      const tat = completionTime - process.arrival; // Turnaround Time
+      const wt = tat - process.burst; // Waiting Time
 
       return {
-        id: p.id,
-        arrival: p.arrival,
-        burst: p.burst,
+        id: process.id,
+        arrival: process.arrival,
+        burst: process.burst,
         completion: completionTime,
         tat: tat,
         wt: wt,
       };
     });
 
-    setProcessStats(stats); // ذخیره مقادیر در استیت
+    setProcessStats(stats);
+
     // آماده‌سازی داده‌ها برای ApexCharts
-    const series = processes.map((process) => {
+    const series = stats.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
-          const xLen = timeline[i + 1]?.time // چک کردن وجود عنصر بعدی
-          if (xLen !== undefined) {
-            for (let j = t.time; j < xLen; j++) {
-              result.push({
-                x: j,
-                y: process.arrival,
-              });
-            }
-          }else{
-            for (let j = t.time; j < (t.time +processes[i].burst); j++) {
-              result.push({
-                x: j,
-                y: process.arrival,
-              });
-            }
+          const xLen = timeline[i + 1]?.time || process.completion;
+          for (let j = t.time; j < xLen; j++) {
+            result.push({
+              x: j,
+              y: process.arrival,
+            });
           }
         }
       }
@@ -94,28 +91,7 @@ const FCFSChart = () => {
         data: result,
       };
     });
-    // const series = processes.map((process) => {
-    //   const processTimeline = [];
-    //   let lastTime = -1; // برای ردیابی زمان قبلی
 
-    //   timeline.forEach((t) => {
-    //     if (t.process === process.id) {
-    //       // اگر فاصله‌ای بین نقاط باشد، آن را پر کن
-    //       if (lastTime !== -1 && t.time > lastTime + 1) {
-    //         for (let i = lastTime + 1; i < t.time; i++) {
-    //           processTimeline.push({ x: i, y: process.arrival });
-    //         }
-    //       }
-    //       processTimeline.push({ x: t.time, y: process.arrival });
-    //       lastTime = t.time;
-    //     }
-    //   });
-
-    //   return {
-    //     name: process.id,
-    //     data: processTimeline,
-    //   };
-    // });
     const processColors = [
       "#FF4560",
       "#008FFB",
@@ -145,15 +121,15 @@ const FCFSChart = () => {
           title: {
             text: "زمان اجرا (Execution Time)",
             style: {
-              color: "#000", // رنگ سفید
-              fontSize: "16px", // اندازه فونت
-              fontWeight: "bold", // اختیاری: بولد کردن متن
+              color: "#000",
+              fontSize: "16px",
+              fontWeight: "bold",
             },
           },
           labels: {
             style: {
-              colors: "#000", // رنگ سفید برای برچسب‌ها
-              fontSize: "14px", // اندازه فونت برای برچسب‌ها
+              colors: "#000",
+              fontSize: "14px",
             },
           },
         },
@@ -161,16 +137,16 @@ const FCFSChart = () => {
           title: {
             text: "زمان ورود (Arrival Time)",
             style: {
-              color: "#000", // رنگ سفید
-              fontSize: "16px", // اندازه فونت
-              fontWeight: "bold", // اختیاری: بولد کردن متن
+              color: "#000",
+              fontSize: "16px",
+              fontWeight: "bold",
             },
           },
           labels: {
-            formatter: (val) => `T${val}`, // فرمت‌دهی برچسب‌ها
+            formatter: (val) => `T${val}`,
             style: {
-              colors: "#000", // رنگ سفید برای برچسب‌ها
-              fontSize: "14px", // اندازه فونت برای برچسب‌ها
+              colors: "#000",
+              fontSize: "14px",
             },
           },
         },
@@ -191,12 +167,13 @@ const FCFSChart = () => {
       },
     });
   }, []);
+
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
       <Card style={{ width: "79%", paddingRight: 15, marginBottom: 30 }}>
         <CardHeader>
-          <CardTitle>نمودار الگوریتم FCFS (محور Y: زمان ورود)</CardTitle>
+          <CardTitle>نمودار الگوریتم FIFO (محور Y: زمان ورود)</CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
         </CardHeader>
         <Chart
@@ -231,4 +208,4 @@ const FCFSChart = () => {
   );
 };
 
-export default FCFSChart;
+export default FIFOChart;

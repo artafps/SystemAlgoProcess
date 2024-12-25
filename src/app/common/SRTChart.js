@@ -20,7 +20,6 @@ const SRTChart = () => {
   });
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
-  console.log(processStats);
   useEffect(() => {
     const processes = [
       { id: "P1", arrival: 0, burst: 8 },
@@ -87,13 +86,11 @@ const SRTChart = () => {
       const processTimeline = timeline
         .filter((t) => t.process === process.id)
         .map((t,i) => {
-          console.log(t,i);
           return(
           {
           x: t.time,
           y: process.arrival,
         })});
-        console.log(processTimeline);
       return {
         name: process.id,
         data: processTimeline,
@@ -128,14 +125,14 @@ const SRTChart = () => {
           title: {
             text: "زمان اجرا (Execution Time)",
             style: {
-              color: "#ffffff", // رنگ سفید
+              color: "#000", // رنگ سفید
               fontSize: "16px", // اندازه فونت
               fontWeight: "bold", // اختیاری: بولد کردن متن
             },
           },
           labels: {
             style: {
-              colors: "#ffffff", // رنگ سفید برای برچسب‌ها
+              colors: "#000", // رنگ سفید برای برچسب‌ها
               fontSize: "14px", // اندازه فونت برای برچسب‌ها
             },
           },
@@ -144,7 +141,7 @@ const SRTChart = () => {
           title: {
             text: "زمان ورود (Arrival Time)",
             style: {
-              color: "#ffffff", // رنگ سفید
+              color: "#000", // رنگ سفید
               fontSize: "16px", // اندازه فونت
               fontWeight: "bold", // اختیاری: بولد کردن متن
             },
@@ -152,7 +149,7 @@ const SRTChart = () => {
           labels: {
             formatter: (val) => `T${val}`, // فرمت‌دهی برچسب‌ها
             style: {
-              colors: "#ffffff", // رنگ سفید برای برچسب‌ها
+              colors: "#000", // رنگ سفید برای برچسب‌ها
               fontSize: "14px", // اندازه فونت برای برچسب‌ها
             },
           },
