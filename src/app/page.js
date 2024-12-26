@@ -9,6 +9,8 @@ import RRChart from "./common/RRChart";
 import HRRNChart from "./common/HRRNChart";
 import LRTFChart from "./common/LRTFChart";
 import DeadlineChart from "./common/DeadlineChart";
+import MultilevelQueueChart from "./common/MultilevelQueueChart";
+import EDFChart from "./common/EDFChart";
 
 const Home = () => {
   return (
@@ -21,9 +23,10 @@ const Home = () => {
           display: "flex",
           justifyContent: "space-between",
           flexDirection: "column",
-          
+        
         }}>
-        <TabsList style={{width:'50%' , margin:'auto'}}>
+        <TabsList style={{width:'90%' ,height:"auto", margin:'auto',display:'flex', flexWrap:"wrap"  ,justifyContent: "space-between" }}>
+          <TabsTrigger value="Config" style={{ background:"red",color:'white'}}>Config</TabsTrigger>
           <TabsTrigger value="SRTChart">SRTChart</TabsTrigger>
           <TabsTrigger value="FCFSChart">FCFSChart</TabsTrigger>
           <TabsTrigger value="SJFChart">SJFChart</TabsTrigger>
@@ -32,6 +35,9 @@ const Home = () => {
           <TabsTrigger value="HRRNChart">HRRNChart</TabsTrigger>
           <TabsTrigger value="LRTFChart">LRTFChart</TabsTrigger>
           <TabsTrigger value="DeadlineChart">DeadlineChart</TabsTrigger>
+          <TabsTrigger value="MultilevelQueueChart">MultilevelQueueChart</TabsTrigger>
+          <TabsTrigger value="EDFChart">EDFChart</TabsTrigger>
+
         </TabsList>
         <TabsContent value="SRTChart">
           <SRTChart />
@@ -59,6 +65,12 @@ const Home = () => {
         <DeadlineChart/>
         </TabsContent>
         
+        <TabsContent value="MultilevelQueueChart">
+        <MultilevelQueueChart/>
+        </TabsContent>
+        <TabsContent value="EDFChart">
+          <EDFChart/>
+        </TabsContent>
       </Tabs>
     </Fragment>
   );
