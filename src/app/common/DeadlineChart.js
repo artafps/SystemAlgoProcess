@@ -13,7 +13,7 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const RRChart = () => {
+const DeadlineChart = () => {
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -22,79 +22,69 @@ const RRChart = () => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    var processes = [
-      { id: "P1", arrival: 0, burst: 8 },
-      { id: "P2", arrival: 1, burst: 4 },
-      { id: "P3", arrival: 2, burst: 9 },
-      { id: "P4", arrival: 3, burst: 5 },
-      { id: "P5", arrival: 6, burst: 5 },
+    const processes = [
+      { id: "P1", arrival: 0, burst: 4, deadline: 8 },
+      { id: "P2", arrival: 1, burst: 3, deadline: 6 },
+      { id: "P3", arrival: 2, burst: 5, deadline: 10 },
+      { id: "P4", arrival: 3, burst: 2, deadline: 5 },
+      { id: "P5", arrival: 4, burst: 4, deadline: 7 },
     ];
-  
-    const timeQuantum = 4; // مقدار تایم کوانتوم
+
     let currentTime = 0;
-    const readyQueue = [];
     const timeline = [];
     const completionTimes = {};
+    const readyQueue = [];
 
-    const remainingBurstTimes = processes.reduce((acc, process) => {
-      acc[process.id] = process.burst;
-      return acc;
-    }, {});
-    
-    // مرتب‌سازی فرآیندها بر اساس زمان ورود
+    // مرتب‌سازی اولیه فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
-  
+
     while (
       processes.length > 0 ||
       readyQueue.length > 0 ||
-      Object.values(remainingBurstTimes).some((time) => time > 0)
+      Object.values(completionTimes).length < processes.length
     ) {
       // اضافه کردن فرآیندهای آماده به صف
       while (processes.length > 0 && processes[0].arrival <= currentTime) {
         readyQueue.push(processes.shift());
       }
-  
+
+      // مرتب‌سازی صف آماده بر اساس ضرب‌الاجل
+      readyQueue.sort((a, b) => a.deadline - b.deadline);
+
       if (readyQueue.length > 0) {
         const process = readyQueue.shift();
-  
-        const execTime = Math.min(remainingBurstTimes[process.id], timeQuantum);
+
         timeline.push({
           time: currentTime,
           process: process.id,
         });
-  
-        currentTime += execTime;
-        remainingBurstTimes[process.id] -= execTime;
-  
-        // اضافه کردن فرآیند به انتهای صف اگر زمان اجرا باقی مانده باشد
-        if (remainingBurstTimes[process.id] > 0) {
-          readyQueue.push(process);
-        } else {
-          completionTimes[process.id] = currentTime;
-        }
+
+        currentTime += process.burst;
+        completionTimes[process.id] = currentTime;
       } else {
         currentTime++;
       }
     }
+
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
-      var processes = [
-        { id: "P1", arrival: 0, burst: 8 },
-        { id: "P2", arrival: 1, burst: 4 },
-        { id: "P3", arrival: 2, burst: 9 },
-        { id: "P4", arrival: 3, burst: 5 },
-        { id: "P5", arrival: 6, burst: 5 },
+      const processes = [
+        { id: "P1", arrival: 0, burst: 4, deadline: 8 },
+        { id: "P2", arrival: 1, burst: 3, deadline: 6 },
+        { id: "P3", arrival: 2, burst: 5, deadline: 10 },
+        { id: "P4", arrival: 3, burst: 2, deadline: 5 },
+        { id: "P5", arrival: 4, burst: 4, deadline: 7 },
       ];
       const process = processes.find((p) => p.id === id) || {
         id: id,
         arrival: 0,
         burst: 0,
+        deadline: 0,
       };
-      
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
       const wt = tat - process.burst;
-  
+
       return {
         id: id,
         arrival: process.arrival,
@@ -102,13 +92,14 @@ const RRChart = () => {
         completion: completionTime,
         tat: tat,
         wt: wt,
+        deadline: process.deadline,
       };
     });
-  
+
     setProcessStats(stats);
-  
+
     // آماده‌سازی داده‌ها برای ApexCharts
-    const series = stats.map((process, index) => {
+    const series = stats.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
@@ -117,7 +108,7 @@ const RRChart = () => {
           for (let j = t.time; j < xLen; j++) {
             result.push({
               x: j, // زمان اجرا
-              y: process.arrival, // زمان ورود تغییر دادم 
+              y: process.arrival, // زمان ورود
             });
           }
         }
@@ -127,7 +118,7 @@ const RRChart = () => {
         data: result,
       };
     });
-  
+
     const processColors = [
       "#FF4560",
       "#008FFB",
@@ -135,7 +126,7 @@ const RRChart = () => {
       "#FEB019",
       "#FEBFFF",
     ];
-  
+
     setChartData({
       series: series,
       options: {
@@ -209,7 +200,7 @@ const RRChart = () => {
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
       <Card style={{ width: "79%", paddingRight: 15, marginBottom: 30 }}>
         <CardHeader>
-          <CardTitle>نمودار الگوریتم Round Robin (RR)</CardTitle>
+          <CardTitle>نمودار الگوریتم Deadline Scheduling</CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
         </CardHeader>
         <Chart
@@ -244,4 +235,4 @@ const RRChart = () => {
   );
 };
 
-export default RRChart;
+export default DeadlineChart;

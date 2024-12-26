@@ -6,6 +6,9 @@ import SJFChart from "./common/SJFChart";
 import FIFOChart from "./common/FIFOChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RRChart from "./common/RRChart";
+import HRRNChart from "./common/HRRNChart";
+import LRTFChart from "./common/LRTFChart";
+import DeadlineChart from "./common/DeadlineChart";
 
 const Home = () => {
   return (
@@ -26,6 +29,9 @@ const Home = () => {
           <TabsTrigger value="SJFChart">SJFChart</TabsTrigger>
           <TabsTrigger value="FIFOChart">FIFOChart</TabsTrigger>
           <TabsTrigger value="RRChart">RRChart</TabsTrigger>
+          <TabsTrigger value="HRRNChart">HRRNChart</TabsTrigger>
+          <TabsTrigger value="LRTFChart">LRTFChart</TabsTrigger>
+          <TabsTrigger value="DeadlineChart">DeadlineChart</TabsTrigger>
         </TabsList>
         <TabsContent value="SRTChart">
           <SRTChart />
@@ -42,6 +48,17 @@ const Home = () => {
         <TabsContent value="RRChart">
           <RRChart />
         </TabsContent>
+        
+        <TabsContent value="HRRNChart">
+        <HRRNChart/>
+        </TabsContent>
+        <TabsContent value="LRTFChart">
+        <LRTFChart/>
+        </TabsContent>
+        <TabsContent value="DeadlineChart">
+        <DeadlineChart/>
+        </TabsContent>
+        
       </Tabs>
     </Fragment>
   );

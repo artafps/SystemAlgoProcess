@@ -13,7 +13,7 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const RRChart = () => {
+const HRRNChart = () => {
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -22,102 +22,110 @@ const RRChart = () => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    var processes = [
+    const processes = [
       { id: "P1", arrival: 0, burst: 8 },
       { id: "P2", arrival: 1, burst: 4 },
       { id: "P3", arrival: 2, burst: 9 },
       { id: "P4", arrival: 3, burst: 5 },
       { id: "P5", arrival: 6, burst: 5 },
     ];
-  
-    const timeQuantum = 4; // مقدار تایم کوانتوم
+
     let currentTime = 0;
-    const readyQueue = [];
     const timeline = [];
     const completionTimes = {};
+    const waitingTimes = {};
+    const turnaroundTimes = {};
 
-    const remainingBurstTimes = processes.reduce((acc, process) => {
-      acc[process.id] = process.burst;
-      return acc;
-    }, {});
-    
     // مرتب‌سازی فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
-  
-    while (
-      processes.length > 0 ||
-      readyQueue.length > 0 ||
-      Object.values(remainingBurstTimes).some((time) => time > 0)
-    ) {
-      // اضافه کردن فرآیندهای آماده به صف
-      while (processes.length > 0 && processes[0].arrival <= currentTime) {
-        readyQueue.push(processes.shift());
-      }
-  
-      if (readyQueue.length > 0) {
-        const process = readyQueue.shift();
-  
-        const execTime = Math.min(remainingBurstTimes[process.id], timeQuantum);
+
+    while (processes.length > 0) {
+      // انتخاب فرآیندهای آماده
+      const readyProcesses = processes.filter(
+        (p) => p.arrival <= currentTime
+      );
+
+      if (readyProcesses.length > 0) {
+        // محاسبه نسبت پاسخ‌دهی برای فرآیندهای آماده
+        readyProcesses.forEach((process) => {
+          const waitingTime = currentTime - process.arrival;
+          process.responseRatio = (waitingTime + process.burst) / process.burst;
+        });
+
+        // انتخاب فرآیندی که بالاترین نسبت پاسخ‌دهی را دارد
+        readyProcesses.sort((a, b) => b.responseRatio - a.responseRatio);
+        const selectedProcess = readyProcesses[0];
+
+        // اجرای فرآیند
         timeline.push({
           time: currentTime,
-          process: process.id,
+          process: selectedProcess.id,
         });
-  
-        currentTime += execTime;
-        remainingBurstTimes[process.id] -= execTime;
-  
-        // اضافه کردن فرآیند به انتهای صف اگر زمان اجرا باقی مانده باشد
-        if (remainingBurstTimes[process.id] > 0) {
-          readyQueue.push(process);
-        } else {
-          completionTimes[process.id] = currentTime;
-        }
+
+        currentTime += selectedProcess.burst;
+        completionTimes[selectedProcess.id] = currentTime;
+
+        // حذف فرآیند از لیست
+        const index = processes.findIndex(
+          (p) => p.id === selectedProcess.id
+        );
+        processes.splice(index, 1);
       } else {
         currentTime++;
       }
     }
+
     // محاسبه WT و TAT
-    const stats = Object.keys(completionTimes).map((id) => {
-      var processes = [
+
+    Object.keys(completionTimes).forEach((id) => {
+      const processes = [
         { id: "P1", arrival: 0, burst: 8 },
         { id: "P2", arrival: 1, burst: 4 },
         { id: "P3", arrival: 2, burst: 9 },
         { id: "P4", arrival: 3, burst: 5 },
         { id: "P5", arrival: 6, burst: 5 },
       ];
-      const process = processes.find((p) => p.id === id) || {
-        id: id,
-        arrival: 0,
-        burst: 0,
-      };
-      
+      const process = processes.find((p) => p.id === id) || {};
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
       const wt = tat - process.burst;
-  
-      return {
-        id: id,
-        arrival: process.arrival,
-        burst: process.burst,
-        completion: completionTime,
-        tat: tat,
-        wt: wt,
-      };
+
+      waitingTimes[id] = wt;
+      turnaroundTimes[id] = tat;
     });
-  
+
+    const stats = Object.keys(completionTimes).map((id) => {
+      const processes = [
+        { id: "P1", arrival: 0, burst: 8 },
+        { id: "P2", arrival: 1, burst: 4 },
+        { id: "P3", arrival: 2, burst: 9 },
+        { id: "P4", arrival: 3, burst: 5 },
+        { id: "P5", arrival: 6, burst: 5 },
+      ];
+      return (
+      {
+      id,
+      arrival: processes.find((p) => p.id === id)?.arrival || 0,
+      burst: processes.find((p) => p.id === id)?.burst || 0,
+      completion: completionTimes[id],
+      tat: turnaroundTimes[id],
+      wt: waitingTimes[id],
+    })});
+
     setProcessStats(stats);
-  
+
     // آماده‌سازی داده‌ها برای ApexCharts
-    const series = stats.map((process, index) => {
+    const series = stats.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
+          console.log(process.arrival);
           for (let j = t.time; j < xLen; j++) {
             result.push({
-              x: j, // زمان اجرا
-              y: process.arrival, // زمان ورود تغییر دادم 
+              x: j,
+              y: process.arrival,
             });
           }
         }
@@ -127,7 +135,7 @@ const RRChart = () => {
         data: result,
       };
     });
-  
+
     const processColors = [
       "#FF4560",
       "#008FFB",
@@ -135,7 +143,7 @@ const RRChart = () => {
       "#FEB019",
       "#FEBFFF",
     ];
-  
+
     setChartData({
       series: series,
       options: {
@@ -209,7 +217,9 @@ const RRChart = () => {
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
       <Card style={{ width: "79%", paddingRight: 15, marginBottom: 30 }}>
         <CardHeader>
-          <CardTitle>نمودار الگوریتم Round Robin (RR)</CardTitle>
+          <CardTitle>
+            نمودار الگوریتم Highest Response Ratio Next (HRRN)
+          </CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
         </CardHeader>
         <Chart
@@ -244,4 +254,4 @@ const RRChart = () => {
   );
 };
 
-export default RRChart;
+export default HRRNChart;
