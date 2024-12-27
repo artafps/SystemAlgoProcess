@@ -13,7 +13,12 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const RRChart = () => {
+const RRChart = ({HandleOnChange}) => {
+  const [processes, setprocesses] = useState([]);
+  useEffect(() => {
+    const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    setprocesses(data)
+  }, [HandleOnChange]);
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -22,13 +27,7 @@ const RRChart = () => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    var processes = [
-      { id: "P1", arrival: 0, burst: 8 },
-      { id: "P2", arrival: 1, burst: 4 },
-      { id: "P3", arrival: 2, burst: 9 },
-      { id: "P4", arrival: 3, burst: 5 },
-      { id: "P5", arrival: 6, burst: 5 },
-    ];
+   
   
     const timeQuantum = 4; // مقدار تایم کوانتوم
     let currentTime = 0;
@@ -78,13 +77,7 @@ const RRChart = () => {
     }
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
-      var processes = [
-        { id: "P1", arrival: 0, burst: 8 },
-        { id: "P2", arrival: 1, burst: 4 },
-        { id: "P3", arrival: 2, burst: 9 },
-        { id: "P4", arrival: 3, burst: 5 },
-        { id: "P5", arrival: 6, burst: 5 },
-      ];
+      
       const process = processes.find((p) => p.id === id) || {
         id: id,
         arrival: 0,
@@ -128,13 +121,10 @@ const RRChart = () => {
       };
     });
   
-    const processColors = [
-      "#FF4560",
-      "#008FFB",
-      "#00E396",
-      "#FEB019",
-      "#FEBFFF",
-    ];
+    const processColors = [];
+    processes.map(item =>{
+      processColors.push(item.color)
+    })
   
     setChartData({
       series: series,
@@ -202,8 +192,8 @@ const RRChart = () => {
         },
       },
     });
-  }, []);
-
+  }, [processes]);
+  console.log(processes);
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
@@ -228,17 +218,19 @@ const RRChart = () => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
-        <Charts data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
-        <Charts
-          data={processStats}
-          name={"tat"}
-          title={"Turnaround Time (TAT)"}
-        />
-        <Charts
-          data={processStats}
-          name={"completion"}
-          title={"Completion Time"}
-        />
+        <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
+               <Charts
+               processes={processes} 
+                 data={processStats}
+                 name={"tat"}
+                 title={"Turnaround Time (TAT)"}
+               />
+                 <Charts
+                   processes={processes} 
+                   data={processStats}
+                   name={"completion"}
+                   title={"Completion Time"}
+                 />
       </div>
     </div>
   );

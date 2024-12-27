@@ -13,7 +13,12 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const EDFChart = () => {
+const EDFChart = ({HandleOnChange}) => {
+  const [processes, setprocesses] = useState([]);
+  useEffect(() => {
+    const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    setprocesses(data)
+  }, [HandleOnChange]);
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -22,12 +27,7 @@ const EDFChart = () => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    const processes = [
-      { id: "P1", arrival: 0, burst: 3, deadline: 7 },
-      { id: "P2", arrival: 2, burst: 6, deadline: 10 },
-      { id: "P3", arrival: 4, burst: 4, deadline: 9 },
-      { id: "P4", arrival: 6, burst: 5, deadline: 15 },
-    ];
+  
 
     let currentTime = 0;
     const timeline = [];
@@ -63,12 +63,7 @@ const EDFChart = () => {
 
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
-      const processes = [
-        { id: "P1", arrival: 0, burst: 3, deadline: 7 },
-        { id: "P2", arrival: 2, burst: 6, deadline: 10 },
-        { id: "P3", arrival: 4, burst: 4, deadline: 9 },
-        { id: "P4", arrival: 6, burst: 5, deadline: 15 },
-      ];
+   
       const process = processes.find((p) => p.id === id) || {
         id: id,
         arrival: 0,
@@ -114,13 +109,10 @@ const EDFChart = () => {
       };
     });
 
-    const processColors = [
-      "#FF4560",
-      "#008FFB",
-      "#00E396",
-      "#FEB019",
-      "#FEBFFF",
-    ];
+    const processColors = [];
+    processes.map(item =>{
+      processColors.push(item.color)
+    })
 
     setChartData({
       series: series,
@@ -188,7 +180,7 @@ const EDFChart = () => {
         },
       },
     });
-  }, []);
+  }, [processes]);
 
   return (
     <div
@@ -214,17 +206,19 @@ const EDFChart = () => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
-        <Charts data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
-        <Charts
-          data={processStats}
-          name={"tat"}
-          title={"Turnaround Time (TAT)"}
-        />
-        <Charts
-          data={processStats}
-          name={"completion"}
-          title={"Completion Time"}
-        />
+         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
+                <Charts
+                processes={processes} 
+                  data={processStats}
+                  name={"tat"}
+                  title={"Turnaround Time (TAT)"}
+                />
+                  <Charts
+                  processes={processes} 
+                    data={processStats}
+                    name={"completion"}
+                    title={"Completion Time"}
+                  />
       </div>
     </div>
   );

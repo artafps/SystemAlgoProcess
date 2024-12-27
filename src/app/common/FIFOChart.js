@@ -13,7 +13,12 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const FIFOChart = () => {
+const FIFOChart = ({HandleOnChange}) => {
+  const [processes, setprocesses] = useState([]);
+  useEffect(() => {
+    const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    setprocesses(data)
+  }, [HandleOnChange]);
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -21,14 +26,7 @@ const FIFOChart = () => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-    const processes = [
-      { id: "P1", arrival: 0, burst: 8 },
-      { id: "P2", arrival: 1, burst: 4 },
-      { id: "P3", arrival: 2, burst: 9 },
-      { id: "P4", arrival: 3, burst: 5 },
-      { id: "P5", arrival: 6, burst: 5 },
-    ];
-
+   
     // مرتب‌سازی فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
 
@@ -92,13 +90,10 @@ const FIFOChart = () => {
       };
     });
 
-    const processColors = [
-      "#FF4560",
-      "#008FFB",
-      "#00E396",
-      "#FEB019",
-      "#FEBFFF",
-    ];
+    const processColors = [];
+    processes.map(item =>{
+      processColors.push(item.color)
+    })
 
     setChartData({
       series: series,
@@ -166,7 +161,7 @@ const FIFOChart = () => {
         },
       },
     });
-  }, []);
+  }, [processes]);
 
   return (
     <div
@@ -192,17 +187,19 @@ const FIFOChart = () => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
-        <Charts data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
-        <Charts
-          data={processStats}
-          name={"tat"}
-          title={"Turnaround Time (TAT)"}
-        />
-        <Charts
-          data={processStats}
-          name={"completion"}
-          title={"Completion Time"}
-        />
+         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
+                <Charts
+                processes={processes} 
+                  data={processStats}
+                  name={"tat"}
+                  title={"Turnaround Time (TAT)"}
+                />
+                  <Charts
+                  processes={processes} 
+                    data={processStats}
+                    name={"completion"}
+                    title={"Completion Time"}
+                  />
       </div>
     </div>
   );

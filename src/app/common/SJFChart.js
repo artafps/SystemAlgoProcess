@@ -13,7 +13,12 @@ import { Charts } from "../charts";
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const SJFChart = () => {
+const SJFChart = ({HandleOnChange}) => {
+  const [processes1, setprocesses] = useState([]);
+  useEffect(() => {
+    const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    setprocesses(data)
+  }, [HandleOnChange]);
   const [chartData, setChartData] = useState({
     series: [],
     options: {},
@@ -21,13 +26,8 @@ const SJFChart = () => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-    const originalProcesses = [
-      { id: "P1", arrival: 0, burst: 8 },
-      { id: "P2", arrival: 1, burst: 4 },
-      { id: "P3", arrival: 2, burst: 9 },
-      { id: "P4", arrival: 3, burst: 5 },
-      { id: "P5", arrival: 6, burst: 5 },
-    ];
+    console.log(processes1);
+    const originalProcesses = processes1
   
     const processes = [...originalProcesses]; // ایجاد نسخه کپی از لیست فرآیندها
     const timeline = [];
@@ -64,11 +64,11 @@ const SJFChart = () => {
     }
   
     // محاسبه WT و TAT با استفاده از originalProcesses
+ 
     const stats = originalProcesses.map((process) => {
       const completionTime = completionTimes[process.id];
       const tat = completionTime - process.arrival; // Turnaround Time
       const wt = tat - process.burst; // Waiting Time
-  
       return {
         id: process.id,
         arrival: process.arrival,
@@ -111,14 +111,11 @@ const SJFChart = () => {
       };
     });
   
-    const processColors = [
-      "#FF4560",
-      "#008FFB",
-      "#00E396",
-      "#FEB019",
-      "#FEBFFF",
-    ];
-  
+    const processColors = [];
+    processes1.map(item =>{
+      processColors.push(item.color)
+    })
+    console.log(processColors);
     setChartData({
       series: series,
       options: {
@@ -185,7 +182,7 @@ const SJFChart = () => {
         },
       },
     });
-  }, []);
+  }, [processes1]);
   
 
   return (
@@ -212,17 +209,19 @@ const SJFChart = () => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
-        <Charts data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
-        <Charts
-          data={processStats}
-          name={"tat"}
-          title={"Turnaround Time (TAT)"}
-        />
-        <Charts
-          data={processStats}
-          name={"completion"}
-          title={"Completion Time"}
-        />
+        <Charts processes={processes1} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
+                <Charts
+                processes={processes1} 
+                  data={processStats}
+                  name={"tat"}
+                  title={"Turnaround Time (TAT)"}
+                />
+                  <Charts
+                  processes={processes1} 
+                    data={processStats}
+                    name={"completion"}
+                    title={"Completion Time"}
+                  />
       </div>
     </div>
   );
