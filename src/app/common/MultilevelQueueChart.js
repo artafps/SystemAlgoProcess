@@ -27,6 +27,7 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
+    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
     
 
     const timeQuantum = 4; // تایم کوانتوم برای صف 1

@@ -47,8 +47,6 @@ const Home = () => {
         <TabsContent value="Config">
           <Card>
            <Config  processes={processes} setProcesses={setProcesses}/>
-           {console.log(processes)}
-           <HRRNChart processes={processes} />
           </Card>
         </TabsContent>
         <TabsContent value="SRTChart">

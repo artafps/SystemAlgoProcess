@@ -27,7 +27,7 @@ const RRChart = ({HandleOnChange}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-   
+    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
   
     const timeQuantum = 4; // مقدار تایم کوانتوم
     let currentTime = 0;
@@ -120,7 +120,7 @@ const RRChart = ({HandleOnChange}) => {
         data: result,
       };
     });
-  
+    console.log(processes);
     const processColors = [];
     processes.map(item =>{
       processColors.push(item.color)
@@ -218,6 +218,7 @@ const RRChart = ({HandleOnChange}) => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
+          {console.log(processes)}
         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
                <Charts
                processes={processes} 

@@ -27,6 +27,7 @@ const EDFChart = ({HandleOnChange}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
+    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
   
 
     let currentTime = 0;

@@ -28,6 +28,7 @@ const HRRNChart = ({HandleOnChange}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
+    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
     let currentTime = 0;
     const timeline = [];
     const completionTimes = {};
@@ -76,7 +77,7 @@ const HRRNChart = ({HandleOnChange}) => {
     // محاسبه WT و TAT
 
     Object.keys(completionTimes).forEach((id) => {
-     
+      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
       const process = processes.find((p) => p.id === id) || {};
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
