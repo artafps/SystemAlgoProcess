@@ -28,13 +28,10 @@ const DeadlineChart = ({HandleOnChange}) => {
 
   useEffect(() => {
     const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    
-
     let currentTime = 0;
     const timeline = [];
     const completionTimes = {};
     const readyQueue = [];
-
     // مرتب‌سازی اولیه فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
 

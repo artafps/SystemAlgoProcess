@@ -4,6 +4,14 @@ import { Input } from "@/components/ui/input"; // کامپوننت Input از sh
 import { Button } from "@/components/ui/button"; // کامپوننت Button از shadcn/ui
 
 const Config = ({ processes, setProcesses }) => {
+    useEffect(() => {
+      const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+      setProcesses(data)
+    }, []);
+    const DeleteProcessesData = () =>{
+      localStorage.clear()
+      setProcesses([])
+    }
   const [arrivalTime, setArrivalTime] = useState("");
   const [burstTime, setBurstTime] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -95,7 +103,9 @@ useEffect(() => {
       <Button onClick={addProcess} style={{ marginRight: "10px" }}>
         Add Process
       </Button>
-
+      <Button onClick={DeleteProcessesData} style={{ marginRight: "10px" }}>
+        Delete All Process
+      </Button>
       <div style={{ marginTop: "20px" }}>
         <h4>Processes List:</h4>
         <ul>

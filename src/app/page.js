@@ -24,7 +24,7 @@ const Home = () => {
   return (
     <Fragment >
       <Tabs
-        defaultValue="SRTChart"
+        defaultValue="Config"
         className="pt-5"
         style={{
           display: "flex",

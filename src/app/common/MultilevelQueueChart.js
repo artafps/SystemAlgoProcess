@@ -9,6 +9,7 @@ import {
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
+import { Input } from "@/components/ui/input";
 
 // لود دینامیک برای ApexCharts
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -25,12 +26,11 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
   });
 
   const [processStats, setProcessStats] = useState([]);
-
+  const [timeQuantum, settimeQuantum] = useState(4);
   useEffect(() => {
     const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
     
 
-    const timeQuantum = 4; // تایم کوانتوم برای صف 1
     const queue1 = processes.filter((p) => p.queue === 1);
     const queue2 = processes.filter((p) => p.queue === 2);
 
@@ -189,7 +189,7 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,timeQuantum]);
 
   return (
     <div
@@ -198,6 +198,19 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
         <CardHeader>
           <CardTitle>نمودار الگوریتم Multilevel Queue</CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
+         <Input type="number" value={timeQuantum} onChange={(e) => {
+          console.log(e.target.value );
+          if(e.target.value === ''){
+            settimeQuantum(4)
+          }else{
+            if(e.target.value<=0){
+              settimeQuantum(0.25)
+            }else{
+              settimeQuantum(e.target.value)
+            }
+          }
+          
+         }}/>
         </CardHeader>
         <Chart
           options={chartData.options}
