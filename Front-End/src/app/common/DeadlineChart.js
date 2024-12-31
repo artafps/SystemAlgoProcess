@@ -9,9 +9,7 @@ import {
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
-
-// لود دینامیک برای ApexCharts
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+import Chart from "react-apexcharts"
 
 const DeadlineChart = ({HandleOnChange}) => {
   const [processes, setprocesses] = useState([]);
