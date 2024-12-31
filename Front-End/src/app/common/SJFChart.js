@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
-import Chart from "react-apexcharts"
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const SJFChart = ({HandleOnChange}) => {
   const [processes1, setprocesses] = useState([]);
   useEffect(() => {

@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 import { Input } from "@/components/ui/input";
 
-import Chart from "react-apexcharts"
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const MultilevelQueueChart = ({HandleOnChange}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {

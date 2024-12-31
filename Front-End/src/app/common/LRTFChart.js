@@ -9,7 +9,7 @@ import {
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
-import Chart from "react-apexcharts"
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const LRTFChart = ({HandleOnChange}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
