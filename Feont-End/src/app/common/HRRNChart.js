@@ -85,7 +85,8 @@ const HRRNChart = ({HandleOnChange}) => {
     });
 
     const stats = Object.keys(completionTimes).map((id) => {
-      const processes1 = processes
+      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+
       return (
       {
       id,

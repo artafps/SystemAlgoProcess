@@ -62,7 +62,7 @@ const EDFChart = ({HandleOnChange}) => {
 
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
-   
+      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
       const process = processes.find((p) => p.id === id) || {
         id: id,
         arrival: 0,

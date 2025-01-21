@@ -78,7 +78,8 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
     });
 
     // محاسبه WT و TAT
-    const stats = processes.map((process) => {
+    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    const stats = processes1.map((process) => {
       const completionTime = completionTimes[process.id];
       const tat = completionTime - process.arrival;
       const wt = tat - process.burst;
