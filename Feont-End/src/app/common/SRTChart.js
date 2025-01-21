@@ -12,7 +12,7 @@ import { Charts } from "../charts";
 
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const SRTChart = ({HandleOnChange}) => {
+const SRTChart = ({HandleOnChange,calculateAverages}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -25,7 +25,6 @@ const SRTChart = ({HandleOnChange}) => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-
     const timeline = [];
     const completed = [];
     let currentTime = 0;
@@ -76,7 +75,9 @@ const SRTChart = ({HandleOnChange}) => {
       };
     });
     setProcessStats(stats); // ذخیره مقادیر در استیت
-
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series =processes.map((process) => {
       const processTimeline = timeline

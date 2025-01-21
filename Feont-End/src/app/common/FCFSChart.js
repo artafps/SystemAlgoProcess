@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const FCFSChart = ({HandleOnChange}) => {
+const FCFSChart = ({HandleOnChange,calculateAverages}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -62,6 +62,9 @@ const FCFSChart = ({HandleOnChange}) => {
     });
 
     setProcessStats(stats); // ذخیره مقادیر در استیت
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = processes.map((process) => {
       const result = [];

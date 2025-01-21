@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const HRRNChart = ({HandleOnChange}) => {
+const HRRNChart = ({HandleOnChange,calculateAverages}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -98,7 +98,9 @@ const HRRNChart = ({HandleOnChange}) => {
     })});
     console.log(stats);
     setProcessStats(stats);
-
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {
       const result = [];

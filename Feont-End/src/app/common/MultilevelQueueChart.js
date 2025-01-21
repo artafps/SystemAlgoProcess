@@ -12,7 +12,7 @@ import { Charts } from "../charts";
 import { Input } from "@/components/ui/input";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const MultilevelQueueChart = ({HandleOnChange}) => {
+const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -95,7 +95,9 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
     });
 
     setProcessStats(stats);
-
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {
       const result = [];

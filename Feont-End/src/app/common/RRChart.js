@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const RRChart = ({HandleOnChange}) => {
+const RRChart = ({HandleOnChange,calculateAverages}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -27,7 +27,7 @@ const RRChart = ({HandleOnChange}) => {
   useEffect(() => {
     const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
   
-    const timeQuantum = 4; // مقدار تایم کوانتوم
+    const timeQuantum = 5; // مقدار تایم کوانتوم
     let currentTime = 0;
     const readyQueue = [];
     const timeline = [];
@@ -97,7 +97,9 @@ const RRChart = ({HandleOnChange}) => {
     });
   
     setProcessStats(stats);
-  
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process, index) => {
       const result = [];
@@ -216,6 +218,7 @@ const RRChart = ({HandleOnChange}) => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
+          {console.log(processes)}
         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
                <Charts
                processes={processes} 

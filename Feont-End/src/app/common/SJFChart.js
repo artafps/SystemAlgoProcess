@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const SJFChart = ({HandleOnChange}) => {
+const SJFChart = ({HandleOnChange,calculateAverages}) => {
   const [processes1, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -77,7 +77,9 @@ const SJFChart = ({HandleOnChange}) => {
     });
   
     setProcessStats(stats);
-  
+    if(stats.length!=0){
+      calculateAverages('SRT',stats)
+    }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {
       const result = [];
