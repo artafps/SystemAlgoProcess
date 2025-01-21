@@ -107,9 +107,9 @@ const EDFChart = ({HandleOnChange}) => {
         data: result,
       };
     });
-
     const processColors = [];
-    processes.map(item =>{
+    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    processes1.map(item =>{
       processColors.push(item.color)
     })
 

@@ -75,7 +75,6 @@ const SRTChart = ({HandleOnChange}) => {
         wt: wt,
       };
     });
-    console.log(stats);
     setProcessStats(stats); // ذخیره مقادیر در استیت
 
     // آماده‌سازی داده‌ها برای ApexCharts

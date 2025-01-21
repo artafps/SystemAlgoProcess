@@ -75,7 +75,6 @@ const DeadlineChart = ({HandleOnChange}) => {
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
       const wt = tat - process.burst;
-
       return {
         id: id,
         arrival: process.arrival,
@@ -86,9 +85,7 @@ const DeadlineChart = ({HandleOnChange}) => {
         deadline: process.deadline,
       };
     });
-
     setProcessStats(stats);
-
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {
       const result = [];
@@ -111,7 +108,8 @@ const DeadlineChart = ({HandleOnChange}) => {
     });
 
     const processColors = [];
-    processes.map(item =>{
+    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    processes1.map(item =>{
       processColors.push(item.color)
     })
 

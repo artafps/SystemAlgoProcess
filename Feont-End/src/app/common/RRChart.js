@@ -119,12 +119,12 @@ const RRChart = ({HandleOnChange}) => {
         data: result,
       };
     });
-    console.log(processes);
+    
     const processColors = [];
-    processes.map(item =>{
+    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    processes1.map(item =>{
       processColors.push(item.color)
     })
-  
     setChartData({
       series: series,
       options: {

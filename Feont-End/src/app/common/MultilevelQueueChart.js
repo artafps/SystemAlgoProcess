@@ -118,7 +118,8 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
     });
 
     const processColors = [];
-    processes.map(item =>{
+    const processes2 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    processes2.map(item =>{
       processColors.push(item.color)
     })
 
