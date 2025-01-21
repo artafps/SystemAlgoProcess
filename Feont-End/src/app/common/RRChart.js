@@ -106,6 +106,7 @@ const RRChart = ({HandleOnChange}) => {
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
           for (let j = t.time; j < xLen; j++) {
+            console.log(j,process.arrival);
             result.push({
               x: j, // زمان اجرا
               y: process.arrival, // زمان ورود تغییر دادم 
@@ -191,7 +192,6 @@ const RRChart = ({HandleOnChange}) => {
       },
     });
   }, [processes]);
-  console.log(processes);
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
@@ -216,7 +216,6 @@ const RRChart = ({HandleOnChange}) => {
           justifyContent: "space-between",
           flexDirection: "column",
         }}>
-          {console.log(processes)}
         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
                <Charts
                processes={processes} 

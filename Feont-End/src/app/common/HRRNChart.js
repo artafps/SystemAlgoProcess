@@ -86,7 +86,6 @@ const HRRNChart = ({HandleOnChange}) => {
 
     const stats = Object.keys(completionTimes).map((id) => {
       const processes1 = processes
-      console.log(processes1);
       return (
       {
       id,
@@ -96,7 +95,7 @@ const HRRNChart = ({HandleOnChange}) => {
       tat: turnaroundTimes[id],
       wt: waitingTimes[id],
     })});
-
+    console.log(stats);
     setProcessStats(stats);
 
     // آماده‌سازی داده‌ها برای ApexCharts
@@ -106,7 +105,6 @@ const HRRNChart = ({HandleOnChange}) => {
         const t = timeline[i];
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
-          console.log(process.arrival);
           for (let j = t.time; j < xLen; j++) {
             result.push({
               x: j,

@@ -75,7 +75,7 @@ const SRTChart = ({HandleOnChange}) => {
         wt: wt,
       };
     });
-
+    console.log(stats);
     setProcessStats(stats); // ذخیره مقادیر در استیت
 
     // آماده‌سازی داده‌ها برای ApexCharts
@@ -180,6 +180,7 @@ const SRTChart = ({HandleOnChange}) => {
           type="scatter"
         />
       </Card>
+      {console.log(processes,processStats)}
       <div style={{ width:"20%",height:600, display:'flex',justifyContent:"space-between",flexDirection:'column'}}>
         <Charts processes={processes} data={processStats} name={"wt"} title={"Waiting Time (WT)"} />
         <Charts

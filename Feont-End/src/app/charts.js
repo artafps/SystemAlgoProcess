@@ -20,7 +20,6 @@ import React from "react"
 
 
 export function Charts(props) {
-  console.log(props);
     function generateFancyRGBColor() {
       const channels = [0, 0, 0]; // سه کانال RGB
       const primaryIndex = Math.floor(Math.random() * 3); // انتخاب یک کانال به صورت تصادفی برای مقدار بالا
@@ -66,16 +65,12 @@ export function Charts(props) {
           return item
         }
       })
-      console.log(colorDataRes);
-      console.log(colorDataRes.color);
-      console.log(i[props.name]);
       data.push({
         month: i.id,
         desktop: i[props.name],
         fill:colorDataRes.color
       }) 
     });
-    console.log(data);
     setData(data);
   }, [props]);
 

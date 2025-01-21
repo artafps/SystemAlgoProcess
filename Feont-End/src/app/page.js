@@ -20,7 +20,6 @@ const Home = () => {
   useEffect(() => {
     console.log(processes);
   }, [processes]);
-  console.log(processes);
   return (
     <Fragment >
       <Tabs

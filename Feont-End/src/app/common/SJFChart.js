@@ -24,7 +24,6 @@ const SJFChart = ({HandleOnChange}) => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-    console.log(processes1);
     const originalProcesses = processes1
   
     const processes = [...originalProcesses]; // ایجاد نسخه کپی از لیست فرآیندها
@@ -113,7 +112,6 @@ const SJFChart = ({HandleOnChange}) => {
     processes1.map(item =>{
       processColors.push(item.color)
     })
-    console.log(processColors);
     setChartData({
       series: series,
       options: {

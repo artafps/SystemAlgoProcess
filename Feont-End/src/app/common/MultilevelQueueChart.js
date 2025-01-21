@@ -197,7 +197,6 @@ const MultilevelQueueChart = ({HandleOnChange}) => {
           <CardTitle>نمودار الگوریتم Multilevel Queue</CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
          <Input type="number" value={timeQuantum} onChange={(e) => {
-          console.log(e.target.value );
           if(e.target.value === ''){
             settimeQuantum(4)
           }else{
