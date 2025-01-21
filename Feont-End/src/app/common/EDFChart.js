@@ -87,7 +87,7 @@ const EDFChart = ({HandleOnChange,calculateAverages}) => {
 
     setProcessStats(stats);
     if(stats.length!=0){
-      calculateAverages('SRT',stats)
+      calculateAverages('EDF',stats)
     }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process, index) => {

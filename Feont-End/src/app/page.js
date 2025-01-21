@@ -58,7 +58,6 @@ const Home = () => {
     }
   }
   useEffect(() => {
-    console.log(processes);
   }, [processes]);
   return (
     <Fragment>
@@ -75,6 +74,16 @@ const Home = () => {
             calculateAverages={calculateAverages}
             processes={processes}
           />
+           <FCFSChart   calculateAverages={calculateAverages} processes={processes} />
+           <SJFChart   calculateAverages={calculateAverages} processes1={processes} />
+           <FIFOChart   calculateAverages={calculateAverages} processes={processes} />
+           <RRChart   calculateAverages={calculateAverages} processes={processes} />
+           <HRRNChart   calculateAverages={calculateAverages} processes={processes} />
+           <LRTFChart   calculateAverages={calculateAverages} processes={processes} />
+           <DeadlineChart   calculateAverages={calculateAverages} processes={processes} />
+           <MultilevelQueueChart   calculateAverages={calculateAverages} processes={processes} />
+           <EDFChart   calculateAverages={calculateAverages} processes={processes} />
+                 
         </div>
         <TabsList
           style={{
@@ -122,6 +131,7 @@ const Home = () => {
                 <tbody>
                   {TableBox.map((item, index) => (
                     <tr key={index} >
+                      <td style={{ border:"1px black solid"}}>{index}</td>
                       <td style={{ border:"1px black solid"}}>{item.title}</td>
                       <td style={{ border:"1px black solid"}}>{item.averageCompletion}</td>
                       <td style={{ border:"1px black solid"}}>{item.averageTAT}</td>

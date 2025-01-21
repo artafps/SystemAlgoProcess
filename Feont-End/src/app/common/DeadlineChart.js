@@ -87,7 +87,7 @@ const DeadlineChart = ({HandleOnChange,calculateAverages}) => {
     });
     setProcessStats(stats);
     if(stats.length!=0){
-      calculateAverages('SRT',stats)
+      calculateAverages('Deadline',stats)
     }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {

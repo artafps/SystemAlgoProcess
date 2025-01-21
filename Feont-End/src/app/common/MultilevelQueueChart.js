@@ -96,7 +96,7 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
 
     setProcessStats(stats);
     if(stats.length!=0){
-      calculateAverages('SRT',stats)
+      calculateAverages('MultilevelQueue',stats)
     }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {

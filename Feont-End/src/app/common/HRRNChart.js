@@ -70,9 +70,7 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
         currentTime++;
       }
     }
-
     // محاسبه WT و TAT
-
     Object.keys(completionTimes).forEach((id) => {
       const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
       const process = processes.find((p) => p.id === id) || {};
@@ -96,10 +94,9 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
       tat: turnaroundTimes[id],
       wt: waitingTimes[id],
     })});
-    console.log(stats);
     setProcessStats(stats);
     if(stats.length!=0){
-      calculateAverages('SRT',stats)
+      calculateAverages('HRRN',stats)
     }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {

@@ -63,7 +63,7 @@ const FCFSChart = ({HandleOnChange,calculateAverages}) => {
 
     setProcessStats(stats); // ذخیره مقادیر در استیت
     if(stats.length!=0){
-      calculateAverages('SRT',stats)
+      calculateAverages('FCFS',stats)
     }
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = processes.map((process) => {
