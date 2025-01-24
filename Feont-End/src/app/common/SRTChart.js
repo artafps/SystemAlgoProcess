@@ -109,9 +109,24 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
             show: false,
           },
         },
+        stroke: {
+          curve: 'smooth', // منحنی نرم برای خط
+          width: 3,        // ضخامت خط
+          dashArray: 5,    // خط چین (خط چین با اندازه 5 پیکسل)
+        },
+        fill: {
+          opacity: 0.3, // شفافیت رنگ داخل خط
+        },
         markers: {
-          size: 10,
-          shape: "square",
+          size: 20,
+          shape: "square", // شکل نقطه‌ها: مربع
+          strokeColors: processColors.slice(0, series.length), // رنگ حاشیه نقاط
+          strokeWidth: 2, // ضخامت حاشیه نقاط
+          hover: {
+            size: 25, // اندازه نقطه هنگام هاور
+          },
+          borderRadius: 8, // رادیوس برای گوشه‌ها
+          strokeDashArray: 5, // خط چین برای حاشیه
         },
         colors: processColors.slice(0, series.length),
         xaxis: {
@@ -160,9 +175,16 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
         tooltip: {
           shared: true,
           intersect: false,
+          style: {
+            fontSize: "20px", // اندازه فونت تولتیپ
+            fontFamily: "Arial, sans-serif", // نوع فونت
+            fontWeight: "normal", // وزن فونت
+            color: "#fff", // رنگ فونت
+          },
         },
       },
     });
+    
   }, [processes]);
   return (
     <div

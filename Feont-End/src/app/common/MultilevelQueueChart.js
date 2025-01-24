@@ -36,46 +36,65 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
     const timeline = [];
     const completionTimes = {};
 
-    // زمان‌بندی صف 1 (Round Robin)
-    const remainingBurstTimes = queue1.reduce((acc, process) => {
-      acc[process.id] = process.burst;
-      return acc;
-    }, {});
+   // زمان‌بندی صف 1 (Round Robin)
+const remainingBurstTimes = queue1.reduce((acc, process) => {
+  acc[process.id] = process.burst;
+  return acc;
+}, {});
 
-    while (
-      queue1.length > 0 ||
-      Object.values(remainingBurstTimes).some((time) => time > 0)
-    ) {
-      const process = queue1.shift();
-      if (remainingBurstTimes[process.id] > 0) {
-        const execTime = Math.min(remainingBurstTimes[process.id], timeQuantum);
-        timeline.push({
-          time: currentTime,
-          process: process.id,
-          queue: process.queue,
-        });
-        currentTime += execTime;
-        remainingBurstTimes[process.id] -= execTime;
-
-        if (remainingBurstTimes[process.id] > 0) {
-          queue1.push(process);
-        } else {
-          completionTimes[process.id] = currentTime;
-        }
-      }
-    }
-
-    // زمان‌بندی صف 2 (FCFS)
-    queue2.sort((a, b) => a.arrival - b.arrival);
-    queue2.forEach((process) => {
+while (
+  queue1.length > 0 ||
+  Object.values(remainingBurstTimes).some((time) => time > 0)
+) {
+  const process = queue1.shift();
+  if (remainingBurstTimes[process.id] > 0) {
+    // اگر زمان ورود فرآیند هنوز نرسیده، از نقاط مشکی برای زمان خالی استفاده کنیم
+    if (currentTime < process.arrival) {
       timeline.push({
         time: currentTime,
-        process: process.id,
-        queue: process.queue,
+        process: "idle", // زمان خالی
+        queue: 0, // برای شناسه صف، عدد 0 برای زمان‌های خالی
       });
-      currentTime = Math.max(currentTime, process.arrival) + process.burst;
-      completionTimes[process.id] = currentTime;
+      currentTime = process.arrival; // زمان جاری را به زمان ورود فرآیند تنظیم می‌کنیم
+    }
+
+    const execTime = Math.min(remainingBurstTimes[process.id], timeQuantum);
+    timeline.push({
+      time: currentTime,
+      process: process.id,
+      queue: process.queue,
     });
+    currentTime += execTime;
+    remainingBurstTimes[process.id] -= execTime;
+
+    if (remainingBurstTimes[process.id] > 0) {
+      queue1.push(process); // دوباره افزودن به صف اگر تمام نشده باشد
+    } else {
+      completionTimes[process.id] = currentTime; // زمان تکمیل
+    }
+  }
+}
+
+// زمان‌بندی صف 2 (FCFS)
+queue2.sort((a, b) => a.arrival - b.arrival);
+queue2.forEach((process) => {
+  // همانطور که در صف اول انجام دادیم، اگر زمان ورود فرآیند هنوز نرسیده باشد
+  if (currentTime < process.arrival) {
+    timeline.push({
+      time: currentTime,
+      process: "idle", // زمان خالی
+      queue: 0,
+    });
+    currentTime = process.arrival;
+  }
+  timeline.push({
+    time: currentTime,
+    process: process.id,
+    queue: process.queue,
+  });
+  currentTime = Math.max(currentTime, process.arrival) + process.burst;
+  completionTimes[process.id] = currentTime;
+});
 
     // محاسبه WT و TAT
     const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -137,24 +156,39 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
             show: false,
           },
         },
+        stroke: {
+          curve: 'smooth', // منحنی نرم برای خط
+          width: 3,        // ضخامت خط
+          dashArray: 5,    // خط چین (خط چین با اندازه 5 پیکسل)
+        },
+        fill: {
+          opacity: 0.3, // شفافیت رنگ داخل خط
+        },
         markers: {
-          size: 10,
-          shape: "square",
+          size: 20,
+          shape: "square", // شکل نقطه‌ها: مربع
+          strokeColors: processColors.slice(0, series.length), // رنگ حاشیه نقاط
+          strokeWidth: 2, // ضخامت حاشیه نقاط
+          hover: {
+            size: 25, // اندازه نقطه هنگام هاور
+          },
+          borderRadius: 8, // رادیوس برای گوشه‌ها
+          strokeDashArray: 5, // خط چین برای حاشیه
         },
         colors: processColors.slice(0, series.length),
         xaxis: {
           title: {
             text: "زمان اجرا (Execution Time)",
             style: {
-              color: "#000",
-              fontSize: "16px",
-              fontWeight: "bold",
+              color: "#000", // رنگ سفید
+              fontSize: "16px", // اندازه فونت
+              fontWeight: "bold", // اختیاری: بولد کردن متن
             },
           },
           labels: {
             style: {
-              colors: "#000",
-              fontSize: "14px",
+              colors: "#000", // رنگ سفید برای برچسب‌ها
+              fontSize: "14px", // اندازه فونت برای برچسب‌ها
             },
           },
         },
@@ -162,16 +196,16 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
           title: {
             text: "زمان ورود (Arrival Time)",
             style: {
-              color: "#000",
-              fontSize: "16px",
-              fontWeight: "bold",
+              color: "#000", // رنگ سفید
+              fontSize: "16px", // اندازه فونت
+              fontWeight: "bold", // اختیاری: بولد کردن متن
             },
           },
           labels: {
-            formatter: (val) => `T${val}`,
+            formatter: (val) => `T${val}`, // فرمت‌دهی برچسب‌ها
             style: {
-              colors: "#000",
-              fontSize: "14px",
+              colors: "#000", // رنگ سفید برای برچسب‌ها
+              fontSize: "14px", // اندازه فونت برای برچسب‌ها
             },
           },
         },
@@ -188,6 +222,12 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
         tooltip: {
           shared: true,
           intersect: false,
+          style: {
+            fontSize: "20px", // اندازه فونت تولتیپ
+            fontFamily: "Arial, sans-serif", // نوع فونت
+            fontWeight: "normal", // وزن فونت
+            color: "#fff", // رنگ فونت
+          },
         },
       },
     });

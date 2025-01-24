@@ -20,9 +20,12 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import Config from "./Config/Config";
+import { Input } from "@/components/ui/input";
 
 const Home = () => {
   var [processes, setProcesses] = useState([]);
+  const [CS, setCS] = useState(2);
+  const [QT, setQT] = useState(5);
   const [TableBox, setTableBox] = useState([
     {
       title: "algorithm",
@@ -52,13 +55,14 @@ const Home = () => {
       averageWT: (totalWT / count).toFixed(2),
     };
     // اضافه کردن داده جدید به استیت
-    const resultSearch = TableBox.filter(item => item.title === algorithmName)
-    if(resultSearch.length===0){
+    const resultSearch = TableBox.filter(
+      (item) => item.title === algorithmName
+    );
+    if (resultSearch.length === 0) {
       setTableBox((prev) => [...prev, data]);
     }
   }
-  useEffect(() => {
-  }, [processes]);
+  useEffect(() => {}, [processes]);
   return (
     <Fragment>
       <Tabs
@@ -74,16 +78,42 @@ const Home = () => {
             calculateAverages={calculateAverages}
             processes={processes}
           />
-           <FCFSChart   calculateAverages={calculateAverages} processes={processes} />
-           <SJFChart   calculateAverages={calculateAverages} processes1={processes} />
-           <FIFOChart   calculateAverages={calculateAverages} processes={processes} />
-           <RRChart   calculateAverages={calculateAverages} processes={processes} />
-           <HRRNChart   calculateAverages={calculateAverages} processes={processes} />
-           <LRTFChart   calculateAverages={calculateAverages} processes={processes} />
-           <DeadlineChart   calculateAverages={calculateAverages} processes={processes} />
-           <MultilevelQueueChart   calculateAverages={calculateAverages} processes={processes} />
-           <EDFChart   calculateAverages={calculateAverages} processes={processes} />
-                 
+          <FCFSChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <SJFChart
+            calculateAverages={calculateAverages}
+            processes1={processes}
+          />
+          <FIFOChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <RRChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <HRRNChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <LRTFChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <DeadlineChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <MultilevelQueueChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
+          <EDFChart
+            calculateAverages={calculateAverages}
+            processes={processes}
+          />
         </div>
         <TabsList
           style={{
@@ -126,16 +156,24 @@ const Home = () => {
                   marginTop: "20px",
                   width: "100%",
                   textAlign: "center",
-                 padding:100
+                  padding: 100,
                 }}>
                 <tbody>
                   {TableBox.map((item, index) => (
-                    <tr key={index} >
-                      <td style={{ border:"1px black solid"}}>{index}</td>
-                      <td style={{ border:"1px black solid"}}>{item.title}</td>
-                      <td style={{ border:"1px black solid"}}>{item.averageCompletion}</td>
-                      <td style={{ border:"1px black solid"}}>{item.averageTAT}</td>
-                      <td style={{ border:"1px black solid"}}>{item.averageWT}</td>
+                    <tr key={index}>
+                      <td style={{ border: "1px black solid" }}>{index}</td>
+                      <td style={{ border: "1px black solid" }}>
+                        {item.title}
+                      </td>
+                      <td style={{ border: "1px black solid" }}>
+                        {item.averageCompletion}
+                      </td>
+                      <td style={{ border: "1px black solid" }}>
+                        {item.averageTAT}
+                      </td>
+                      <td style={{ border: "1px black solid" }}>
+                        {item.averageWT}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -144,6 +182,42 @@ const Home = () => {
           </Card>
         </TabsContent>
         <TabsContent value="Config">
+          <Card>
+          <div
+      style={{
+        width: "min(500px , 80%)",
+        padding: "20px",
+        margin: "auto",
+        borderRadius: "8px",
+      }}>
+            <div style={{ marginBottom: "10px" }}>
+              <label>Context Switch: </label>
+              <Input
+                type="number"
+                value={CS}
+                onChange={(e) => 
+                 { if(e.target.value>=0){
+                    setCS(e.target.value)
+                  }
+                }}
+                placeholder="Arrival Time"
+              />
+            </div>
+            <div style={{ marginBottom: "10px" }}>
+              <label>Quantum Time: </label>
+              <Input
+                type="number"
+                value={QT}
+                onChange={(e) => {
+                  if(e.target.value>0){
+                    setQT(e.target.value)
+                  }
+                  }}
+                placeholder="Arrival Time"
+              />
+            </div>  </div>
+          </Card>
+
           <Card>
             <Config processes={processes} setProcesses={setProcesses} />
           </Card>
@@ -200,7 +274,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <FCFSChart   calculateAverages={calculateAverages} processes={processes} />
+              <FCFSChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def fcfs_scheduling(processes):
@@ -225,7 +302,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <SJFChart   calculateAverages={calculateAverages} processes1={processes} />
+              <SJFChart
+                calculateAverages={calculateAverages}
+                processes1={processes}
+              />
               <pre>
                 <code>
                   {`def sjf_scheduling(processes):
@@ -251,7 +331,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <FIFOChart   calculateAverages={calculateAverages} processes={processes} />
+              <FIFOChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def fifo_scheduling(processes):
@@ -276,7 +359,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <RRChart   calculateAverages={calculateAverages} processes={processes} />
+              <RRChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def rr_scheduling(processes, quantum):
@@ -315,7 +401,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <HRRNChart   calculateAverages={calculateAverages} processes={processes} />
+              <HRRNChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def hrrn_scheduling(processes):
@@ -341,7 +430,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <LRTFChart   calculateAverages={calculateAverages} processes={processes} />
+              <LRTFChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def lrtf_scheduling(processes):
@@ -379,7 +471,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DeadlineChart   calculateAverages={calculateAverages} processes={processes} />
+              <DeadlineChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def deadline_scheduling(processes):
@@ -405,7 +500,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <MultilevelQueueChart   calculateAverages={calculateAverages} processes={processes} />
+              <MultilevelQueueChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def multilevel_queue_scheduling(processes):
@@ -431,7 +529,10 @@ const Home = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <EDFChart   calculateAverages={calculateAverages} processes={processes} />
+              <EDFChart
+                calculateAverages={calculateAverages}
+                processes={processes}
+              />
               <pre>
                 <code>
                   {`def edf_scheduling(processes):

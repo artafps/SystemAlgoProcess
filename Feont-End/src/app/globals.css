@@ -6,6 +6,21 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   /* background-color: rgb(0 9 22); */
 }
+/* استایل برای نقاط مربعی */
+#chart .apexcharts-marker {
+  stroke-linejoin: round;   /* گوشه‌های گرد برای مسیر */
+  stroke-linecap: round;    /* لبه‌های نرم */
+  stroke-width: 2px;        /* ضخامت حاشیه */
+  stroke: #FF6384;          /* رنگ حاشیه */
+  fill: rgba(213,218,0,0.6); /* رنگ داخل */
+  fill-opacity: 1;           /* شفافیت رنگ داخل */
+}
+
+/* تغییرات هنگام هاور */
+#chart .apexcharts-marker:hover {
+  fill: rgba(213,218,0,0.9); /* افزایش شفافیت هنگام هاور */
+  stroke: #FF0000;           /* تغییر رنگ حاشیه هنگام هاور */
+}
 
 @layer base {
   :root {

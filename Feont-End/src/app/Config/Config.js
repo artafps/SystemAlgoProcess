@@ -95,7 +95,11 @@ useEffect(() => {
         <Input
           type="number"
           value={Queue}
-          onChange={(e) => setQueue(e.target.value)}
+          onChange={(e) => {
+            if(e.target.value>0 && e.target.value<3){
+              setQueue(e.target.value)
+            }
+            }}
           placeholder="Queue"
         />
       </div>
