@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const HRRNChart = ({HandleOnChange,calculateAverages}) => {
+const HRRNChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -25,7 +25,10 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    const processes = localStorage.getItem("data")
+      ? JSON.parse(localStorage.getItem("data"))
+      : [];
+    const contextSwitchTime = CS; // زمان کانتکس سویچ
     let currentTime = 0;
     const timeline = [];
     const completionTimes = {};
@@ -61,6 +64,11 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
         currentTime += selectedProcess.burst;
         completionTimes[selectedProcess.id] = currentTime;
 
+        // اضافه کردن زمان کانتکس سویچ اگر فرآیند دیگری در صف آماده باشد
+        if (processes.length > 1) {
+          currentTime += contextSwitchTime;
+        }
+
         // حذف فرآیند از لیست
         const index = processes.findIndex(
           (p) => p.id === selectedProcess.id
@@ -70,9 +78,12 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
         currentTime++;
       }
     }
+
     // محاسبه WT و TAT
     Object.keys(completionTimes).forEach((id) => {
-      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+      const processes = localStorage.getItem("data")
+        ? JSON.parse(localStorage.getItem("data"))
+        : [];
       const process = processes.find((p) => p.id === id) || {};
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
@@ -83,21 +94,27 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
     });
 
     const stats = Object.keys(completionTimes).map((id) => {
-      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+      const processes = localStorage.getItem("data")
+        ? JSON.parse(localStorage.getItem("data"))
+        : [];
 
-      return (
-      {
-      id,
-      arrival: processes.find((p) => p.id === id)?.arrival || 0,
-      burst: processes.find((p) => p.id === id)?.burst || 0,
-      completion: completionTimes[id],
-      tat: turnaroundTimes[id],
-      wt: waitingTimes[id],
-    })});
+      return {
+        id,
+        arrival: processes.find((p) => p.id === id)?.arrival || 0,
+        burst: processes.find((p) => p.id === id)?.burst || 0,
+        completion: completionTimes[id],
+        tat: turnaroundTimes[id],
+        wt: waitingTimes[id],
+        color:processes.find((p) => p.id === id)?.color || 0,
+      };
+    });
+
     setProcessStats(stats);
-    if(stats.length!=0){
-      calculateAverages('HRRN',stats)
+
+    if (stats.length !== 0) {
+      calculateAverages("HRRN", stats);
     }
+
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = stats.map((process) => {
       const result = [];
@@ -105,7 +122,7 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
         const t = timeline[i];
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
-          for (let j = t.time; j < xLen; j++) {
+          for (let j = t.time; j < t.time + process.burst; j++) {
             result.push({
               x: j,
               y: process.arrival,
@@ -120,11 +137,12 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
     });
 
     const processColors = [];
-    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    processes1.map(item =>{
-      processColors.push(item.color)
-    })
-
+    const processesData = localStorage.getItem("data")
+      ? JSON.parse(localStorage.getItem("data"))
+      : [];
+      stats.map((item) => {
+      processColors.push(item.color);
+    });
     setChartData({
       series: series,
       options: {
@@ -212,7 +230,7 @@ const HRRNChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS,QT]);
 
   return (
     <div

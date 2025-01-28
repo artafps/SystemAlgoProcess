@@ -34,6 +34,7 @@ const Home = () => {
       averageWT: "Average WT",
     },
   ]);
+  var dataList = [...TableBox]
 
   function calculateAverages(algorithmName, processes) {
     let totalCompletion = 0;
@@ -55,14 +56,21 @@ const Home = () => {
       averageWT: (totalWT / count).toFixed(2),
     };
     // اضافه کردن داده جدید به استیت
-    const resultSearch = TableBox.filter(
+    const resultSearch = dataList.filter(
       (item) => item.title === algorithmName
     );
     if (resultSearch.length === 0) {
-      setTableBox((prev) => [...prev, data]);
+      dataList.push(data)
+    } else {
+      const resultSearch = dataList.filter(
+        (item) => item.title !== algorithmName
+      );
+      resultSearch.push(data);
+      dataList = resultSearch
     }
+    setTableBox(dataList)
   }
-  useEffect(() => {}, [processes]);
+  useEffect(() => {}, [processes,CS,QT]);
   return (
     <Fragment>
       <Tabs
@@ -75,42 +83,62 @@ const Home = () => {
         }}>
         <div style={{ display: "none" }}>
           <SRTChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <FCFSChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <SJFChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes1={processes}
           />
           <FIFOChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <RRChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <HRRNChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <LRTFChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <DeadlineChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <MultilevelQueueChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
           <EDFChart
+            QT={QT}
+            CS={CS}
             calculateAverages={calculateAverages}
             processes={processes}
           />
@@ -183,39 +211,40 @@ const Home = () => {
         </TabsContent>
         <TabsContent value="Config">
           <Card>
-          <div
-      style={{
-        width: "min(500px , 80%)",
-        padding: "20px",
-        margin: "auto",
-        borderRadius: "8px",
-      }}>
-            <div style={{ marginBottom: "10px" }}>
-              <label>Context Switch: </label>
-              <Input
-                type="number"
-                value={CS}
-                onChange={(e) => 
-                 { if(e.target.value>=0){
-                    setCS(e.target.value)
-                  }
-                }}
-                placeholder="Arrival Time"
-              />
-            </div>
-            <div style={{ marginBottom: "10px" }}>
-              <label>Quantum Time: </label>
-              <Input
-                type="number"
-                value={QT}
-                onChange={(e) => {
-                  if(e.target.value>0){
-                    setQT(e.target.value)
-                  }
+            <div
+              style={{
+                width: "min(500px , 80%)",
+                padding: "20px",
+                margin: "auto",
+                borderRadius: "8px",
+              }}>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Context Switch: </label>
+                <Input
+                  type="number"
+                  value={CS}
+                  onChange={(e) => {
+                    if (e.target.value >= 0) {
+                      setCS(parseInt(e.target.value));
+                    }
                   }}
-                placeholder="Arrival Time"
-              />
-            </div>  </div>
+                  placeholder="Arrival Time"
+                />
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Quantum Time: </label>
+                <Input
+                  type="number"
+                  value={QT}
+                  onChange={(e) => {
+                    if (e.target.value > 0) {
+                      setQT(parseInt(e.target.value));
+                    }
+                  }}
+                  placeholder="Arrival Time"
+                />
+              </div>{" "}
+            </div>
           </Card>
 
           <Card>
@@ -234,6 +263,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <SRTChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -275,6 +306,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <FCFSChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -303,6 +336,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <SJFChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes1={processes}
               />
@@ -332,6 +367,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <FIFOChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -360,6 +397,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <RRChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -402,6 +441,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <HRRNChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -431,6 +472,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <LRTFChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -472,6 +515,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <DeadlineChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -501,6 +546,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <MultilevelQueueChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />
@@ -530,6 +577,8 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <EDFChart
+                QT={QT}
+                CS={CS}
                 calculateAverages={calculateAverages}
                 processes={processes}
               />

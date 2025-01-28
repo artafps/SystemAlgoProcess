@@ -12,7 +12,7 @@ import { Charts } from "../charts";
 import { Input } from "@/components/ui/input";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
+const MultilevelQueueChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -24,7 +24,7 @@ const MultilevelQueueChart = ({HandleOnChange,calculateAverages}) => {
   });
 
   const [processStats, setProcessStats] = useState([]);
-  const [timeQuantum, settimeQuantum] = useState(4);
+
   useEffect(() => {
     const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
     
@@ -58,7 +58,7 @@ while (
       currentTime = process.arrival; // زمان جاری را به زمان ورود فرآیند تنظیم می‌کنیم
     }
 
-    const execTime = Math.min(remainingBurstTimes[process.id], timeQuantum);
+    const execTime = Math.min(remainingBurstTimes[process.id], QT);
     timeline.push({
       time: currentTime,
       process: process.id,
@@ -231,7 +231,7 @@ queue2.forEach((process) => {
         },
       },
     });
-  }, [processes,timeQuantum]);
+  }, [processes,QT,CS]);
 
   return (
     <div
@@ -240,18 +240,7 @@ queue2.forEach((process) => {
         <CardHeader>
           <CardTitle>نمودار الگوریتم Multilevel Queue</CardTitle>
           <CardDescription>نمایش فرآیندهای زمان‌بندی‌شده</CardDescription>
-         <Input type="number" value={timeQuantum} onChange={(e) => {
-          if(e.target.value === ''){
-            settimeQuantum(4)
-          }else{
-            if(e.target.value<=0){
-              settimeQuantum(0.25)
-            }else{
-              settimeQuantum(e.target.value)
-            }
-          }
-          
-         }}/>
+        
         </CardHeader>
         <Chart
           options={chartData.options}

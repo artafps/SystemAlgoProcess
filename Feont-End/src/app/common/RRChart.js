@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const RRChart = ({ HandleOnChange, calculateAverages }) => {
+const RRChart = ({ HandleOnChange, calculateAverages, CS, QT }) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")
@@ -31,7 +31,8 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
       ? JSON.parse(localStorage.getItem("data"))
       : [];
 
-    const timeQuantum = 5; // مقدار تایم کوانتوم
+    const timeQuantum = QT; // مقدار تایم کوانتوم
+    const contextSwitchTime = CS; // زمان کانتکس سویچ (به عنوان مثال 1 واحد زمانی)
     let currentTime = 0;
     const readyQueue = [];
     const timeline = [];
@@ -42,7 +43,6 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
       return acc;
     }, {});
 
-    // مرتب‌سازی فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
 
     while (
@@ -73,10 +73,22 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
         } else {
           completionTimes[process.id] = currentTime;
         }
+
+        // ثبت کانتکس سویچ (زمان تعویض پردازش)
+        if (readyQueue.length > 0) {
+          timeline.push({
+            time: currentTime,
+            process: "Context Switch",
+          });
+          currentTime += contextSwitchTime; // زمان کانتکس سویچ
+        }
       } else {
         currentTime++;
       }
     }
+
+    console.log(completionTimes, "completionTimes");
+
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
       const processes = localStorage.getItem("data")
@@ -87,7 +99,6 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
         arrival: 0,
         burst: 0,
       };
-      console.log(process,processes);
       const completionTime = completionTimes[id];
       const tat = completionTime - process.arrival;
       const wt = tat - process.burst;
@@ -99,33 +110,35 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
         completion: completionTime,
         tat: tat,
         wt: wt,
-        color:process.color
+        color: process.color,
       };
     });
 
     setProcessStats(stats);
-    if (stats.length != 0) {
+    if (stats.length !== 0) {
       calculateAverages("RR", stats);
     }
+
     // آماده‌سازی داده‌ها برای ApexCharts
-    const DataResultQT = []
-    const series = stats.map((process, index) => {
+    const DataResultQT = [];
+    const series = stats.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
-          //const xLen = timeline[i + 1]?.time || process.completion;
-          const NumberOfQT = (B,T,id) =>{
-            const Number =  DataResultQT.filter(item => item.ID === id).length
-            console.log(DataResultQT);
-            console.log(T,B,Number,T+(B-Number),id);
-            return T+(B-Number)
-          }
-          const xLen = NumberOfQT(process.burst,t.time,process.id)
-          for (let j = t.time; j < xLen; j++) {
+          const xLen2 = timeline[i + 1]?.time || process.completion;
+          const NumberOfQT = (id) => {
+            const Number = DataResultQT.filter((item) => item.ID === id).length;
+            return Number;
+          };
+          for (
+            let j = t.time;
+            j < xLen2 && process.burst > NumberOfQT(process.id);
+            j++
+          ) {
             DataResultQT.push({
-              ID:process.id
-            })
+              ID: process.id,
+            });
             result.push({
               x: j, // زمان اجرا
               y: process.arrival, // زمان ورود تغییر دادم
@@ -140,10 +153,11 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
     });
 
     const processColors = [];
-    
-      stats.map((item) => {
+
+    stats.map((item) => {
       processColors.push(item.color);
     });
+
     setChartData({
       series: series,
       options: {
@@ -231,7 +245,7 @@ const RRChart = ({ HandleOnChange, calculateAverages }) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes, CS, QT]);
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>

@@ -12,8 +12,11 @@ import { Charts } from "../charts";
 
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const SRTChart = ({HandleOnChange,calculateAverages}) => {
+
+const SRTChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
+console.log("LOAD");
   const [processes, setprocesses] = useState([]);
+  
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
     setprocesses(data)
@@ -25,21 +28,25 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
+    var quantum =QT;
+    var contextSwitchTime =CS;
     const timeline = [];
     const completed = [];
     let currentTime = 0;
 
     const completionTimes = {};
     const burstCopy = processes.map((p) => ({ ...p })); // کپی burst اصلی
+    let remainingQuantum = quantum; // مقدار کوانتوم تایم از پراپس
 
     // شبیه‌سازی الگوریتم SRT
     while (completed.length < processes.length) {
       const availableProcesses = burstCopy.filter(
         (p) => p.arrival <= currentTime && !completed.includes(p.id)
       );
-
+      console.log(availableProcesses);
       if (availableProcesses.length === 0) {
         currentTime++;
+        remainingQuantum = quantum; // ریست کردن کوانتوم
         continue;
       }
 
@@ -51,19 +58,24 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
       currentProcess.burst--;
       timeline.push({ time: currentTime, process: currentProcess.id });
 
+      remainingQuantum--;
+
       if (currentProcess.burst === 0) {
         completed.push(currentProcess.id);
-        completionTimes[currentProcess.id] = currentTime + 1; // زمان تکمیل
+        currentTime += contextSwitchTime; // زمان تکمیل
+        completionTimes[currentProcess.id] = currentTime + 1;
+        remainingQuantum = quantum; // ریست کوانتوم
+      } else if (remainingQuantum === 0) {
+        currentTime += contextSwitchTime; // افزودن فاصله کانتنت سویچ به زمان
+        remainingQuantum = quantum; // ریست کوانتوم
       }
-
       currentTime++;
     }
-
     // محاسبه WT و TAT
     const stats = processes.map((p) => {
-      const completionTime = completionTimes[p.id];
-      const tat = completionTime - p.arrival; // Turnaround Time
-      const wt = tat - p.burst; // Waiting Time
+      const completionTime = completionTimes[p.id]-2;
+      const tat =( completionTime - p.arrival) < 0  ?0:( completionTime - p.arrival); // Turnaround Time
+      const wt = (tat - p.burst) <= 0 ? 0:(tat - p.burst); // Waiting Time
 
       return {
         id: p.id,
@@ -75,28 +87,29 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
       };
     });
     setProcessStats(stats); // ذخیره مقادیر در استیت
-    if(stats.length!=0){
-      calculateAverages('SRT',stats)
+    console.log(stats);
+    if (stats.length !== 0) {
+      console.log("SRT");
+      calculateAverages("SRT", stats);
     }
+
     // آماده‌سازی داده‌ها برای ApexCharts
-    const series =processes.map((process) => {
+    let series = []
+    series = processes.map((process) => {
       const processTimeline = timeline
         .filter((t) => t.process === process.id)
-        .map((t,i) => {
-          return(
-          {
+        .map((t) => ({
           x: t.time,
           y: process.arrival,
-        })});
+        }));
       return {
         name: process.id,
         data: processTimeline,
       };
     });
-    const processColors = [];
-    processes.map(item =>{
-      processColors.push(item.color)
-    })
+
+    const processColors = processes.map((item) => item.color);
+
     setChartData({
       series: series,
       options: {
@@ -184,8 +197,7 @@ const SRTChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-    
-  }, [processes]);
+  }, [processes,CS,QT]);
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>

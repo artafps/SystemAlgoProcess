@@ -68,7 +68,7 @@ export function Charts(props) {
       data.push({
         month: i.id,
         desktop: i[props.name],
-        fill:colorDataRes.color
+        fill:colorDataRes?colorDataRes.color:"#000"
       }) 
     });
     setData(data);

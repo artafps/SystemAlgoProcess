@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const FIFOChart = ({HandleOnChange,calculateAverages}) => {
+const FIFOChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -24,76 +24,85 @@ const FIFOChart = ({HandleOnChange,calculateAverages}) => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-   
-    // مرتب‌سازی فرآیندها بر اساس زمان ورود
-    processes.sort((a, b) => a.arrival - b.arrival);
+    const contextSwitchTime = CS;
+   // مرتب‌سازی فرآیندها بر اساس زمان ورود
+   processes.sort((a, b) => a.arrival - b.arrival);
 
-    let currentTime = 0;
-    const completionTimes = [];
-    const timeline = [];
-    processes.forEach((process) => {
-      // فرآیند را به خط زمان اضافه کنید
-      timeline.push({
-        time: Math.max(currentTime, process.arrival),
-        process: process.id,
-      });
+   let currentTime = 0;
+   const completionTimes = [];
+   const timeline = [];
 
-      // محاسبه زمان تکمیل فرآیند
-      currentTime = Math.max(currentTime, process.arrival) + process.burst;
-      completionTimes.push({
-        id: process.id,
-        completion: currentTime,
-      });
-    });
+   processes.forEach((process, index) => {
+     // افزودن زمان کانتکس سویچ (به جز اولین فرآیند)
+     if (index > 0) {
+       currentTime += contextSwitchTime;
+       timeline.push({
+         time: currentTime - contextSwitchTime,
+         process: "CS", // علامت‌گذاری کانتکس سویچ
+       });
+     }
 
-    // محاسبه WT و TAT
-    const stats = processes.map((process) => {
-      const completionTime = completionTimes.find(
-        (c) => c.id === process.id
-      ).completion;
-      const tat = completionTime - process.arrival; // Turnaround Time
-      const wt = tat - process.burst; // Waiting Time
+     // فرآیند را به خط زمان اضافه کنید
+     timeline.push({
+       time: Math.max(currentTime, process.arrival),
+       process: process.id,
+     });
 
-      return {
-        id: process.id,
-        arrival: process.arrival,
-        burst: process.burst,
-        completion: completionTime,
-        tat: tat,
-        wt: wt,
-      };
-    });
+     // محاسبه زمان تکمیل فرآیند
+     currentTime = Math.max(currentTime, process.arrival) + process.burst;
+     completionTimes.push({
+       id: process.id,
+       completion: currentTime,
+     });
+   });
 
-    setProcessStats(stats);
-    if(stats.length!=0){
-      calculateAverages('FIFO',stats)
-    }
-    // آماده‌سازی داده‌ها برای ApexCharts
-    const series = stats.map((process) => {
-      const result = [];
-      for (let i = 0; i < timeline.length; i++) {
-        const t = timeline[i];
-        if (t.process === process.id) {
-          const xLen = timeline[i + 1]?.time || process.completion;
-          for (let j = t.time; j < (t.time +processes[i].burst); j++) {
-            result.push({
-              x: j,
-              y: process.arrival,
-            });
-          }
-        }
-      }
-      return {
-        name: process.id,
-        data: result,
-      };
-    });
+   // محاسبه WT و TAT
+   const stats = processes.map((process) => {
+     const completionTime = completionTimes.find((c) => c.id === process.id).completion;
+     const tat = completionTime - process.arrival; // Turnaround Time
+     const wt = tat - process.burst; // Waiting Time
 
-    const processColors = [];
-    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    processes1.map(item =>{
-      processColors.push(item.color)
-    })
+     return {
+       id: process.id,
+       arrival: process.arrival,
+       burst: process.burst,
+       completion: completionTime,
+       tat: tat,
+       wt: wt,
+     };
+   });
+
+   setProcessStats(stats);
+   if (stats.length !== 0) {
+     calculateAverages("FIFO", stats);
+   }
+
+   // آماده‌سازی داده‌ها برای ApexCharts
+   const series = processes.map((process) => {
+     const result = [];
+     for (let i = 0; i < timeline.length; i++) {
+       const t = timeline[i];
+       if (t.process === process.id) {
+         const xLen = timeline[i + 1]?.time || process.completion;
+         for (let j = t.time; j < t.time + process.burst; j++) {
+           result.push({
+             x: j,
+             y: process.arrival,
+           });
+         }
+       }
+     }
+     return {
+       name: process.id,
+       data: result,
+     };
+   });
+
+   const processColors = [];
+   const processes1 = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : [];
+   processes1.map((item) => {
+     processColors.push(item.color);
+   });
 
     setChartData({
       series: series,
@@ -182,7 +191,7 @@ const FIFOChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS,QT]);
 
   return (
     <div

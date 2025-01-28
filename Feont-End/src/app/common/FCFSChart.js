@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const FCFSChart = ({HandleOnChange,calculateAverages}) => {
+const FCFSChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -24,27 +24,41 @@ const FCFSChart = ({HandleOnChange,calculateAverages}) => {
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
   useEffect(() => {
-    
-
+    const contextSwitchTime = CS;
     const timeline = [];
     let currentTime = 0;
 
     const completionTimes = {};
 
     // شبیه‌سازی الگوریتم FCFS
-    processes.sort((a, b) => a.arrival - b.arrival); // Sort by arrival time
+    processes.sort((a, b) => a.arrival - b.arrival); // مرتب‌سازی بر اساس زمان ورود
 
-    processes.forEach((process) => {
+    processes.forEach((process, index) => {
       if (currentTime < process.arrival) {
+        // اگر CPU بیکار باشد
         currentTime = process.arrival;
       }
+
+      // اضافه کردن زمان کانتکس سویچ قبل از شروع هر فرآیند (به جز اولین فرآیند)
+      if (index > 0) {
+        timeline.push({
+          time: currentTime,
+          process: "CS", // نمایش کانتکس سویچ در نمودار (بدون اضافه کردن به داده‌های واقعی)
+        });
+        currentTime += contextSwitchTime;
+      }
+
+      // ثبت زمان شروع فرآیند در timeline
       timeline.push({
         time: currentTime,
         process: process.id,
       });
+
+      // اجرای فرآیند
       currentTime += process.burst;
       completionTimes[process.id] = currentTime;
     });
+
     // محاسبه WT و TAT
     const stats = processes.map((p) => {
       const completionTime = completionTimes[p.id];
@@ -61,31 +75,25 @@ const FCFSChart = ({HandleOnChange,calculateAverages}) => {
       };
     });
 
-    setProcessStats(stats); // ذخیره مقادیر در استیت
-    if(stats.length!=0){
-      calculateAverages('FCFS',stats)
+    setProcessStats(stats);
+
+    if (stats.length !== 0) {
+      calculateAverages("FCFS", stats);
     }
+
     // آماده‌سازی داده‌ها برای ApexCharts
     const series = processes.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
-          const xLen = timeline[i + 1]?.time // چک کردن وجود عنصر بعدی
-          if (xLen !== undefined) {
-            for (let j = t.time; j < (t.time +processes[i].burst); j++) {
-              result.push({
-                x: j,
-                y: process.arrival,
-              });
-            }
-          }else{
-            for (let j = t.time; j < (t.time +processes[i].burst); j++) {
-              result.push({
-                x: j,
-                y: process.arrival,
-              });
-            }
+         
+
+          for (let j = t.time; j <  t.time + process.burst; j++) {
+            result.push({
+              x: j,
+              y: process.arrival,
+            });
           }
         }
       }
@@ -94,33 +102,26 @@ const FCFSChart = ({HandleOnChange,calculateAverages}) => {
         data: result,
       };
     });
-    // const series = processes.map((process) => {
-    //   const processTimeline = [];
-    //   let lastTime = -1; // برای ردیابی زمان قبلی
 
-    //   timeline.forEach((t) => {
-    //     if (t.process === process.id) {
-    //       // اگر فاصله‌ای بین نقاط باشد، آن را پر کن
-    //       if (lastTime !== -1 && t.time > lastTime + 1) {
-    //         for (let i = lastTime + 1; i < t.time; i++) {
-    //           processTimeline.push({ x: i, y: process.arrival });
-    //         }
-    //       }
-    //       processTimeline.push({ x: t.time, y: process.arrival });
-    //       lastTime = t.time;
-    //     }
-    //   });
+    // نمایش کانتکس سویچ در نمودار
+    const contextSwitchData = timeline
+      .filter((t) => t.process === "CS")
+      .map((t) => ({
+        name: "Context Switch",
+        data: [
+          {
+            x: t.time,
+            y: null, // نمایش خالی برای تاکید بر کانتکس سویچ
+          },
+        ],
+      }));
 
-    //   return {
-    //     name: process.id,
-    //     data: processTimeline,
-    //   };
-    // });
+    // تنظیم رنگ‌ها
     const processColors = [];
-    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    processes1.map(item =>{
-      processColors.push(item.color)
-    })
+    const processes1 = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : [];
+    processes1.map((item) => {
+      processColors.push(item.color);
+    });
 
     setChartData({
       series: series,
@@ -209,7 +210,7 @@ const FCFSChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS,QT]);
   return (
     <div
       style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>

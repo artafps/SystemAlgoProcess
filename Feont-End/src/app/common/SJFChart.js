@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const SJFChart = ({HandleOnChange,calculateAverages}) => {
+const SJFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes1, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -23,45 +23,74 @@ const SJFChart = ({HandleOnChange,calculateAverages}) => {
   });
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
+  console.log(CS,QT);
   useEffect(() => {
-    const originalProcesses = processes1
-  
-    const processes = [...originalProcesses]; // ایجاد نسخه کپی از لیست فرآیندها
+    const quantum = QT;
+    const contextSwitchTime = CS;
+    
+    const originalProcesses = processes1.map((p) => ({
+      ...p,
+      remainingBurst: p.burst, // اضافه کردن مقدار باقی‌مانده‌ی burst برای پشتیبانی از کوانتوم
+    }));
+
+    const processes = [...originalProcesses];
     const timeline = [];
     let currentTime = 0;
-  
+
     const completionTimes = {};
     const readyQueue = [];
-  
+    let lastProcessId = null; // برای ردیابی آخرین فرآیند اجرا شده
+
     // مرتب‌سازی فرآیندها بر اساس زمان ورود
     processes.sort((a, b) => a.arrival - b.arrival);
-  
+
     while (processes.length > 0 || readyQueue.length > 0) {
-      // اضافه کردن فرآیندها به صف آماده
+      // اضافه کردن فرآیندهای جدید به صف آماده
       while (processes.length > 0 && processes[0].arrival <= currentTime) {
         readyQueue.push(processes.shift());
       }
-  
-      // مرتب‌سازی صف آماده بر اساس Burst Time
-      readyQueue.sort((a, b) => a.burst - b.burst);
-  
+    
+      // مرتب‌سازی صف آماده بر اساس remainingBurst (کمترین burst باقی‌مانده)
+      readyQueue.sort((a, b) => a.remainingBurst - b.remainingBurst);
+    
       if (readyQueue.length > 0) {
         const process = readyQueue.shift();
-  
+    
+        // اگر فرآیند قبلی متفاوت از فرآیند جدید باشد، زمان جابجایی اضافه می‌شود
+        if (lastProcessId !== null && lastProcessId !== process.id) {
+          currentTime += contextSwitchTime;
+        }
+    
+        // اعمال کوانتوم: فقط به اندازه quantum اجرا شود
+        const timeToExecute = Math.min(quantum, process.remainingBurst);
+    
         timeline.push({
           time: currentTime,
           process: process.id,
         });
-  
-        currentTime += process.burst;
-        completionTimes[process.id] = currentTime;
+    
+        currentTime += timeToExecute;
+        process.remainingBurst -= timeToExecute;
+    
+        // اگر فرآیند هنوز کامل نشده، دوباره به صف اضافه می‌شود
+        if (process.remainingBurst > 0) {
+          // اگر به صف اضافه می‌شود، زمان جابجایی باید دوباره محاسبه شود
+          currentTime += contextSwitchTime; // اضافه کردن زمان جابجایی قبل از بازگشت به صف
+          readyQueue.push(process);
+        } else {
+          // اگر فرآیند کامل شده باشد، زمان اتمام آن ذخیره می‌شود
+          completionTimes[process.id] = currentTime;
+        }
+    
+        lastProcessId = process.id; // به‌روزرسانی فرآیند فعلی
       } else {
-        currentTime++;
+        currentTime++; // اگر هیچ فرآیندی آماده نبود، زمان جلو می‌رود
       }
     }
-  
+    
+    
+
     // محاسبه WT و TAT با استفاده از originalProcesses
- 
     const stats = originalProcesses.map((process) => {
       const completionTime = completionTimes[process.id];
       const tat = completionTime - process.arrival; // Turnaround Time
@@ -75,31 +104,53 @@ const SJFChart = ({HandleOnChange,calculateAverages}) => {
         wt: wt,
       };
     });
-  
+
     setProcessStats(stats);
-    if(stats.length!=0){
-      calculateAverages('SJF',stats)
+
+    if (stats.length !== 0) {
+      calculateAverages("SJF", stats);
     }
+
+
     // آماده‌سازی داده‌ها برای ApexCharts
+    const DataResultQT = []
+    console.log(stats);
     const series = stats.map((process) => {
       const result = [];
+      let remainingBurst = process.burst;
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
+    
           const xLen = timeline[i + 1]?.time;
+          const NumberOfQT = (id) => {
+            const Number = DataResultQT.filter(item => item.ID === id).length;
+            return Number;
+          };
+    
           if (xLen !== undefined) {
-            for (let j = t.time; j < t.time + process.burst; j++) {
+            // زمانی که کوانتوم تایم تمام شد و باید جداگانه زمان‌ها تقسیم شوند
+            for (let j = t.time; j < t.time + quantum && remainingBurst > 0; j++) {
+              DataResultQT.push({
+                ID: process.id,
+              });
               result.push({
                 x: j,
                 y: process.arrival,
               });
+              remainingBurst--;
             }
           } else {
-            for (let j = t.time; j < t.time + process.burst; j++) {
+            // آخرین اجرای فرآیند
+            for (let j = t.time; j < t.time + remainingBurst && remainingBurst > 0; j++) {
+              DataResultQT.push({
+                ID: process.id,
+              });
               result.push({
                 x: j,
                 y: process.arrival,
               });
+              remainingBurst--;
             }
           }
         }
@@ -109,11 +160,9 @@ const SJFChart = ({HandleOnChange,calculateAverages}) => {
         data: result,
       };
     });
-  
-    const processColors = [];
-    processes1.map(item =>{
-      processColors.push(item.color)
-    })
+
+    const processColors = processes1.map((item) => item.color);
+
     setChartData({
       series: series,
       options: {
@@ -201,7 +250,7 @@ const SJFChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes1]);
+  }, [processes1,CS,QT]);
   
 
   return (

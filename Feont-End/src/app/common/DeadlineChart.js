@@ -12,7 +12,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const DeadlineChart = ({HandleOnChange,calculateAverages}) => {
+const DeadlineChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -27,42 +27,58 @@ const DeadlineChart = ({HandleOnChange,calculateAverages}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    let currentTime = 0;
-    const timeline = [];
-    const completionTimes = {};
-    const readyQueue = [];
-    // مرتب‌سازی اولیه فرآیندها بر اساس زمان ورود
-    processes.sort((a, b) => a.arrival - b.arrival);
-
-    while (
-      processes.length > 0 ||
-      readyQueue.length > 0 ||
-      Object.values(completionTimes).length < processes.length
-    ) {
-      // اضافه کردن فرآیندهای آماده به صف
-      while (processes.length > 0 && processes[0].arrival <= currentTime) {
-        readyQueue.push(processes.shift());
-      }
-
-      // مرتب‌سازی صف آماده بر اساس ضرب‌الاجل
-      readyQueue.sort((a, b) => a.deadline - b.deadline);
-
-      if (readyQueue.length > 0) {
-        const process = readyQueue.shift();
-
+    const processes = localStorage.getItem("data")
+    ? JSON.parse(localStorage.getItem("data"))
+    : [];
+  let currentTime = 0;
+  const timeline = [];
+  const completionTimes = {};
+  const readyQueue = [];
+  const contextSwitchTime = CS; // زمان کانتکس سوییچ
+  let previousProcess = null; // متغیر برای ذخیره فرآیند قبلی
+  
+  // مرتب‌سازی اولیه فرآیندها بر اساس زمان ورود
+  processes.sort((a, b) => a.arrival - b.arrival);
+  
+  while (
+    processes.length > 0 ||
+    readyQueue.length > 0 ||
+    Object.values(completionTimes).length < processes.length
+  ) {
+    // اضافه کردن فرآیندهای آماده به صف
+    while (processes.length > 0 && processes[0].arrival <= currentTime) {
+      readyQueue.push(processes.shift());
+    }
+  
+    // مرتب‌سازی صف آماده بر اساس ضرب‌الاجل
+    readyQueue.sort((a, b) => a.deadline - b.deadline);
+  
+    if (readyQueue.length > 0) {
+      const process = readyQueue.shift();
+  
+      // بررسی کانتکس سوییچ
+      if (previousProcess && previousProcess.id !== process.id) {
+        currentTime += contextSwitchTime; // اضافه کردن زمان کانتکس سوییچ
         timeline.push({
           time: currentTime,
-          process: process.id,
+          process: "Context Switch", // ثبت کانتکس سوییچ در تایم‌لاین
         });
-
-        currentTime += process.burst;
-        completionTimes[process.id] = currentTime;
-      } else {
-        currentTime++;
       }
+  
+      timeline.push({
+        time: currentTime,
+        process: process.id,
+      });
+  
+      currentTime += process.burst;
+      completionTimes[process.id] = currentTime;
+  
+      previousProcess = process; // به‌روزرسانی فرآیند قبلی
+    } else {
+      currentTime++;
     }
-
+  }
+  
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
       const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -96,7 +112,7 @@ const DeadlineChart = ({HandleOnChange,calculateAverages}) => {
         const t = timeline[i];
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
-          for (let j = t.time; j < xLen; j++) {
+          for (let j = t.time; j < t.time + process.burst; j++) {
             result.push({
               x: j, // زمان اجرا
               y: process.arrival, // زمان ورود
@@ -203,7 +219,7 @@ const DeadlineChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS,QT]);
 
   return (
     <div

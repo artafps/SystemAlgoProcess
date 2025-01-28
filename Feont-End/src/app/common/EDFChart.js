@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const EDFChart = ({HandleOnChange,calculateAverages}) => {
+const EDFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -25,41 +25,54 @@ const EDFChart = ({HandleOnChange,calculateAverages}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    const processes = localStorage.getItem("data")
+    ? JSON.parse(localStorage.getItem("data"))
+    : [];
   
-
-    let currentTime = 0;
-    const timeline = [];
-    const completionTimes = {};
-
-    // مرتب کردن فرآیندها بر اساس زمان ورود
-    processes.sort((a, b) => a.arrival - b.arrival);
-
-    while (processes.length > 0) {
-      // فیلتر کردن فرآیندهای آماده
-      const readyQueue = processes.filter((p) => p.arrival <= currentTime);
-
-      if (readyQueue.length > 0) {
-        // انتخاب فرآیندی با نزدیک‌ترین deadline
-        readyQueue.sort((a, b) => a.deadline - b.deadline);
-        const process = readyQueue[0];
-
+  let currentTime = 0;
+  const timeline = [];
+  const completionTimes = {};
+  const contextSwitchTime = CS; // زمان کانتکس سوییچ
+  let previousProcess = null; // متغیر برای ذخیره فرآیند قبلی
+  
+  // مرتب کردن فرآیندها بر اساس زمان ورود
+  processes.sort((a, b) => a.arrival - b.arrival);
+  
+  while (processes.length > 0) {
+    // فیلتر کردن فرآیندهای آماده
+    const readyQueue = processes.filter((p) => p.arrival <= currentTime);
+  
+    if (readyQueue.length > 0) {
+      // انتخاب فرآیندی با نزدیک‌ترین deadline
+      readyQueue.sort((a, b) => a.deadline - b.deadline);
+      const process = readyQueue[0];
+  
+      // بررسی کانتکس سوییچ
+      if (previousProcess && previousProcess.id !== process.id) {
+        currentTime += contextSwitchTime; // اضافه کردن زمان کانتکس سوییچ
         timeline.push({
           time: currentTime,
-          process: process.id,
+          process: "Context Switch", // ثبت کانتکس سوییچ در تایم‌لاین
         });
-
-        currentTime += process.burst;
-        completionTimes[process.id] = currentTime;
-
-        // حذف فرآیند انجام‌شده از لیست
-        const index = processes.findIndex((p) => p.id === process.id);
-        processes.splice(index, 1);
-      } else {
-        currentTime++;
       }
+  
+      timeline.push({
+        time: currentTime,
+        process: process.id,
+      });
+  
+      currentTime += process.burst;
+      completionTimes[process.id] = currentTime;
+  
+      // حذف فرآیند انجام‌شده از لیست
+      const index = processes.findIndex((p) => p.id === process.id);
+      processes.splice(index, 1);
+  
+      previousProcess = process; // به‌روزرسانی فرآیند قبلی
+    } else {
+      currentTime++;
     }
-
+  }
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {
       const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -96,7 +109,7 @@ const EDFChart = ({HandleOnChange,calculateAverages}) => {
         const t = timeline[i];
         if (t.process === process.id) {
           const xLen = timeline[i + 1]?.time || process.completion;
-          for (let j = t.time; j < xLen; j++) {
+          for (let j = t.time; j < t.time + process.burst; j++) {
             result.push({
               x: j, // زمان اجرا
               y: process.arrival, // زمان ورود
@@ -202,7 +215,7 @@ const EDFChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS,QT]);
 
   return (
     <div

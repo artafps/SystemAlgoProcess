@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { Charts } from "../charts";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const LRTFChart = ({HandleOnChange,calculateAverages}) => {
+const LRTFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   const [processes, setprocesses] = useState([]);
   useEffect(() => {
     const data = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
@@ -24,87 +24,109 @@ const LRTFChart = ({HandleOnChange,calculateAverages}) => {
   const [processStats, setProcessStats] = useState([]);
 
   useEffect(() => {
-    const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
+    const contextSwitchTime = CS;
+    const data = localStorage.getItem("data")
+      ? JSON.parse(localStorage.getItem("data"))
+      : [];
     let currentTime = 0;
     const timeline = [];
     const completionTimes = {};
-    const remainingBurstTimes = processes.reduce((acc, process) => {
+    const remainingBurstTimes = data.reduce((acc, process) => {
       acc[process.id] = process.burst;
       return acc;
     }, {});
-
+    
     // مرتب‌سازی فرآیندها بر اساس زمان ورود
-    processes.sort((a, b) => a.arrival - b.arrival);
-
+    data.sort((a, b) => a.arrival - b.arrival);
     const readyQueue = [];
-
+    let previousProcess = null; // ذخیره فرآیند قبلی برای مدیریت سوئیچ
+    
     while (
-      processes.length > 0 ||
+      data.length > 0 ||
       readyQueue.length > 0 ||
       Object.values(remainingBurstTimes).some((time) => time > 0)
     ) {
       // اضافه کردن فرآیندهای آماده به صف
-      while (processes.length > 0 && processes[0].arrival <= currentTime) {
-        readyQueue.push(processes.shift());
+      while (data.length > 0 && data[0].arrival <= currentTime) {
+        readyQueue.push(data.shift());
       }
-
-      // انتخاب فرآیندی با بیشترین زمان باقی‌مانده
+    
+      // مرتب‌سازی صف آماده بر اساس زمان باقی‌مانده
       readyQueue.sort((a, b) => remainingBurstTimes[b.id] - remainingBurstTimes[a.id]);
-
+    
       if (readyQueue.length > 0) {
         const process = readyQueue[0];
-
+    
+        // بررسی تغییر فرآیند برای کانتکس سویچ
+        if (previousProcess && previousProcess.id !== process.id) {
+          // ثبت کانتکس سویچ در timeline
+          timeline.push({
+            time: currentTime,
+            process: "Context Switch", // نشان‌دهنده زمان کانتکس سویچ
+          });
+          currentTime += contextSwitchTime; // اضافه کردن زمان کانتکس سویچ
+        }
+    
         timeline.push({
           time: currentTime,
-          process: process.id,
+          process: process.id, // فرآیندی که اجرا می‌شود
         });
-
-        currentTime++;
+    
+        currentTime++; // یک واحد زمان پیشروی می‌کنیم
         remainingBurstTimes[process.id]--;
-
+        previousProcess = process; // به‌روزرسانی فرآیند قبلی
+    
         if (remainingBurstTimes[process.id] === 0) {
           completionTimes[process.id] = currentTime;
           readyQueue.shift(); // حذف فرآیند تکمیل‌شده از صف
         }
       } else {
-        currentTime++;
+        currentTime++; // پیشروی زمان در صورت نبود فرآیند آماده
       }
     }
+    
+  // محاسبه WT و TAT
+  const stats = Object.keys(completionTimes).map((id) => {
+    const process = processes.find((p) => p.id === id) || {
+      id,
+      arrival: 0,
+      burst: 0,
+    };
+    const completionTime = completionTimes[id];
+    const tat = completionTime - process.arrival;
+    const wt = tat - process.burst;
 
-    // محاسبه WT و TAT
-    const stats = Object.keys(completionTimes).map((id) => {
-      const processes = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-      const process = processes.find((p) => p.id === id) || {
-        id: id,
-        arrival: 0,
-        burst: 0,
-      };
-      const completionTime = completionTimes[id];
-      const tat = completionTime - process.arrival;
-      const wt = tat - process.burst;
+    return {
+      id,
+      arrival: process.arrival,
+      burst: process.burst,
+      completion: completionTime,
+      tat,
+      wt,
+      color: process.color,
+    };
+  });
 
-      return {
-        id: id,
-        arrival: process.arrival,
-        burst: process.burst,
-        completion: completionTime,
-        tat: tat,
-        wt: wt,
-      };
-    });
-
-    setProcessStats(stats);
-    if(stats.length!=0){
-      calculateAverages('LRTF',stats)
-    }
+  setProcessStats(stats);
+  if (stats.length > 0) {
+    calculateAverages("LRTF", stats);
+  }
     // آماده‌سازی داده‌ها برای ApexCharts
+    const DataResultQT = []
     const series = stats.map((process) => {
       const result = [];
       for (let i = 0; i < timeline.length; i++) {
         const t = timeline[i];
         if (t.process === process.id) {
-          const xLen = timeline[i + 1]?.time || process.completion;
-          for (let j = t.time; j < xLen; j++) {
+          const xLen2 = timeline[i + 1]?.time || process.completion;
+          const NumberOfQT = (id) =>{
+            const Number =  DataResultQT.filter(item => item.ID === id).length
+            return Number
+          }
+          for (let j = t.time; j < xLen2 && process.burst >  NumberOfQT(process.id); j++) {
+            DataResultQT.push({
+              ID:process.id
+            })
             result.push({
               x: j, // زمان اجرا
               y: process.arrival, // زمان ورود
@@ -119,8 +141,7 @@ const LRTFChart = ({HandleOnChange,calculateAverages}) => {
     });
 
     const processColors = [];
-    const processes1 = localStorage.getItem("data")? JSON.parse(localStorage.getItem("data")): []
-    processes1.map(item =>{
+    stats.map(item =>{
       processColors.push(item.color)
     })
 
@@ -211,7 +232,7 @@ const LRTFChart = ({HandleOnChange,calculateAverages}) => {
         },
       },
     });
-  }, [processes]);
+  }, [processes,CS]);
 
   return (
     <div
