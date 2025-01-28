@@ -87,7 +87,6 @@ const RRChart = ({ HandleOnChange, calculateAverages, CS, QT }) => {
       }
     }
 
-    console.log(completionTimes, "completionTimes");
 
     // محاسبه WT و TAT
     const stats = Object.keys(completionTimes).map((id) => {

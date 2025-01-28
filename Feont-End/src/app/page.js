@@ -23,6 +23,16 @@ import Config from "./Config/Config";
 import { Input } from "@/components/ui/input";
 
 const Home = () => {
+  console.log(
+    `%c {Dr. Jamalian's project}`,
+     'font-size: 20px; color: white; font-weight: bold;',
+   );
+  console.log(
+    '%c {POWER BY : \n%c https://github.com/artafps \n%c https://github.com/HoutanTV }',
+    'font-size: 20px; color: white; font-weight: bold;',
+    'font-size: 20px; color: white; font-weight: bold;',
+    'font-size: 20px; color: white; font-weight: bold;'
+  );
   var [processes, setProcesses] = useState([]);
   const [CS, setCS] = useState(2);
   const [QT, setQT] = useState(5);

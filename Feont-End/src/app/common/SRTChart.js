@@ -14,7 +14,6 @@ import { Charts } from "../charts";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const SRTChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
-console.log("LOAD");
   const [processes, setprocesses] = useState([]);
   
   useEffect(() => {
@@ -43,7 +42,6 @@ console.log("LOAD");
       const availableProcesses = burstCopy.filter(
         (p) => p.arrival <= currentTime && !completed.includes(p.id)
       );
-      console.log(availableProcesses);
       if (availableProcesses.length === 0) {
         currentTime++;
         remainingQuantum = quantum; // ریست کردن کوانتوم
@@ -87,9 +85,7 @@ console.log("LOAD");
       };
     });
     setProcessStats(stats); // ذخیره مقادیر در استیت
-    console.log(stats);
     if (stats.length !== 0) {
-      console.log("SRT");
       calculateAverages("SRT", stats);
     }
 

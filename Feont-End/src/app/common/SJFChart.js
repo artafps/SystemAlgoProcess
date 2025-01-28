@@ -23,7 +23,6 @@ const SJFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
   });
 
   const [processStats, setProcessStats] = useState([]); // ذخیره اطلاعات WT و TAT
-  console.log(CS,QT);
   useEffect(() => {
     const quantum = QT;
     const contextSwitchTime = CS;
@@ -114,7 +113,6 @@ const SJFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
 
     // آماده‌سازی داده‌ها برای ApexCharts
     const DataResultQT = []
-    console.log(stats);
     const series = stats.map((process) => {
       const result = [];
       let remainingBurst = process.burst;

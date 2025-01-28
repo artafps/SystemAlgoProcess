@@ -44,7 +44,6 @@ const Config = ({ processes, setProcesses }) => {
       color:generateFancyRGBColor()
     };
 
-    console.log(dataGetLocalStorange);
     localStorage.setItem("data",JSON.stringify([...dataGetLocalStorange, newProcess]))
     setArrivalTime("");
     setBurstTime("");
@@ -52,7 +51,6 @@ const Config = ({ processes, setProcesses }) => {
     setQueue("");
   };
 useEffect(() => {
-  console.log(processes);
 }, [processes]);
   return (
     <div

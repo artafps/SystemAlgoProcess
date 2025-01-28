@@ -232,7 +232,7 @@ const LRTFChart = ({HandleOnChange,calculateAverages,CS,QT}) => {
         },
       },
     });
-  }, [processes,CS]);
+  }, [processes,CS,QT]);
 
   return (
     <div
