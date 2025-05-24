@@ -1,0 +1,110 @@
+---
+title: "آشنایی با الگوریتم زمان‌بندی RR"
+summary: "الگوریتم RR (Round Robin) پرکاربردترین روش پیش‌گیرانه در سیستم‌های اشتراک زمانی است و با تخصیص کوانتوم زمانی ثابت بین پردازش‌ها عدالت نسبی را برقرار می‌کند."
+publishedAt: "2025-05-19"
+tag: "الگوریتم‌های زمان‌بندی"
+---
+
+import { CodeBlock } from "@/components/CodeBlock"
+
+## الگوریتم RR چیست؟
+
+**RR | Round Robin** یک سیاست **پیش‌گیرانه** است که CPU را در بازه‌های زمانی مساوی (Time Quantum) میان پردازش‌های صف آماده **چرخشی** توزیع می‌کند.  
+پس از پایان هر کوانتوم، اگر پردازش کامل نشده باشد، به انتهای صف فرستاده می‌شود و نوبت بعدی خود را منتظر می‌ماند.
+
+- **عادلانه** برای همهٔ پردازش‌ها (تقریباً هیچ‌کس گرسنه نمی‌شود).  
+- **واکنش سریع** برای سیستم‌های تعاملی در صورت انتخاب کوانتوم مناسب.  
+- با کوچک‌شدن بیش‌ازحد کوانتوم، **سربار سوییچ زمینه** زیاد می‌شود.
+
+---
+
+## A مثال (Quantum = 3)
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `شناسه   زمان ورود   زمان اجرا
+P1       0          10
+P2       1          4
+P3       2          6`,
+      language: "plaintext",
+      label: "جدول پردازش‌ها"
+    }
+  ]}
+/>
+
+---
+
+## B اجرای گام‌به‌گام
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `t=0   : P1 اجرا (باقی 7) ← پایان کوانتوم
+t=3   : P2 اجرا (باقی 1) ← پایان کوانتوم
+t=6   : P3 اجرا (باقی 3) ← پایان کوانتوم
+t=9   : P1 اجرا (باقی 4) ← پایان کوانتوم
+t=12  : P2 اجرا و تمام می‌شود
+t=13  : P3 اجرا (باقی 0) و تمام می‌شود
+t=16  : P1 اجرا (باقی 1) ← پایان کوانتوم
+t=19  : P1 اجرا و تمام می‌شود`,
+      language: "plaintext",
+      label: "Time‑line RR (q=3)"
+    }
+  ]}
+/>
+
+---
+
+## C کد جاوااسکریپت
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `function rrSchedule(processes, quantum = 3) {
+  let time = 0;
+  const queue = [...processes].map(p => ({ ...p, remaining: p.burstTime }));
+  const done = [];
+
+  while (queue.length) {
+    const current = queue.shift();
+
+    // اگر هنوز وارد نشده، زمان را جلو ببریم
+    if (current.arrivalTime > time) time = current.arrivalTime;
+
+    // مدت واقعی اجرا در این نوبت
+    const exec = Math.min(quantum, current.remaining);
+    current.start = time;
+    time += exec;
+    current.remaining -= exec;
+
+    if (current.remaining === 0) {
+      done.push({ ...current, end: time });
+    } else {
+      queue.push(current); // دوباره به ته صف
+    }
+
+    // پردازش‌های تازه‌وارد را به ترتیب ورود داخل صف نگه دار
+    processes
+      .filter(p => p.arrivalTime > current.arrivalTime && p.arrivalTime <= time)
+      .forEach(p => {
+        if (!queue.find(x => x.pid === p.pid) && !done.find(x => x.pid === p.pid)) {
+          queue.push({ ...p, remaining: p.burstTime });
+        }
+      });
+  }
+  return done;
+}`,
+      language: "javascript",
+      label: "کد RR"
+    }
+  ]}
+/>
+
+---
+
+## D جمع‌بندی
+
+Round Robin با **کوانتوم ثابت** تعادل خوبی میان **تعامل‌پذیری** و **عدالت** ایجاد می‌کند.  
+- انتخاب نادرست کوانتوم می‌تواند به **سربار زیاد** یا **واکنش کند** منجر شود.  
+- گاهی با ترکیب RR و اولویت، پاسخ‌گویی به پردازش‌های حیاتی تضمین می‌شود.

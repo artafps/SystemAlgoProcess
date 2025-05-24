@@ -1,0 +1,108 @@
+---
+title: "آشنایی با الگوریتم زمان‌بندی SRTF"
+summary: "الگوریتم SRTF (کوتاه‌ترین زمان باقیمانده آغازین) نسخهٔ پیش‌گیرانهٔ SJF است و در هر لحظه پردازشی با کمترین زمان اجرای باقیمانده را انتخاب می‌کند."
+publishedAt: "2025-05-18"
+tag: "الگوریتم‌های زمان‌بندی"
+image: "/images/avatar.jpg"
+---
+
+import { CodeBlock } from "@/components/CodeBlock"
+
+## الگوریتم SRTF چیست؟
+
+**SRTF | Shortest Remaining Time First** (با نام **Preemptive SJF** نیز شناخته می‌شود) یک سیاست **پیش‌گیرانه** است:  
+هر زمان پردازش جدیدی وارد صف آماده شود، اگر زمان باقیماندهٔ آن از زمان باقیماندهٔ پردازش در حال اجرا کمتر باشد، CPU **سریعا** به پردازش جدید واگذار می‌شود.
+
+---
+
+## A مثال
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `شناسه   زمان ورود   زمان اجرا
+P1       0          8
+P2       1          4
+P3       2          9
+P4       3          5`,
+      language: "plaintext",
+      label: "جدول پردازش‌ها"
+    }
+  ]}
+/>
+
+---
+
+## B اجرای گام‌به‌گام
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `t=0  : شروع P1 (باقی‌مانده 8)
+t=1  : P2 وارد می‌شود ← باقی‌مانده 4 < 7 ⇒ سوئیچ به P2
+t=2  : P3 وارد می‌شود (9) ← ادامه P2
+t=3  : P4 وارد می‌شود (5) ← ادامه P2 (باقی‌مانده 2)
+t=5  : پایان P2 → صف: P1(5), P4(5), P3(9) ⇒ انتخاب P1 (کوچک‌ترین)
+t=6…10: P1 به 0 می‌رسد → انتخاب P4 (5)
+t=15 : پایان P4 → انتخاب P3 (9)
+t=24 : پایان P3`,
+      language: "plaintext",
+      label: "تایم‌لاین SRTF"
+    }
+  ]}
+/>
+
+---
+
+## C کد جاوااسکریپت
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `function srtfSchedule(processes) {
+  let time = 0;
+  const done = [];
+  // کپی عمیق و افزودن فیلد remaining
+  processes = processes.map(p => ({ ...p, remaining: p.burstTime }));
+
+  while (processes.length) {
+    // پردازش‌های آماده
+    const ready = processes.filter(p => p.arrivalTime <= time);
+
+    // اگر هیچ پردازشی آماده نیست، زمان را جلو ببریم
+    if (!ready.length) {
+      time = Math.min(...processes.map(p => p.arrivalTime));
+      continue;
+    }
+
+    // انتخاب با کمترین remaining
+    ready.sort((a, b) => a.remaining - b.remaining);
+    const current = ready[0];
+
+    // اجرای یک واحد زمانی
+    current.remaining--;
+    time++;
+
+    // اگر تمام شد، به done منتقل کن
+    if (current.remaining === 0) {
+      done.push({ ...current, end: time });
+      processes = processes.filter(p => p.pid !== current.pid);
+    }
+  }
+  return done;
+}`,
+      language: "javascript",
+      label: "کد SRTF"
+    }
+  ]}
+/>
+
+---
+
+## D جمع‌بندی
+
+SRTF با **پیش‌گیری سریع**، میانگین زمان پاسخ را کمینه می‌کند؛ اما  
+- نیازمند **برآورد دقیق زمان اجرا** است.  
+- تعویض‌های مکرر **هزینه سربار** دارد.  
+- خطر **گرسنگی پردازش‌های بلند** در حضور سیل پردازش‌های کوتاه وجود دارد.
+

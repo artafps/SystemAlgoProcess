@@ -34,29 +34,29 @@ export default function Home() {
 
     const nonPreemptiveLinks = [
         {
-            href: "/algorithms/fcfs",
+            href: "/blog/FCFS",
             title: "FCFS (اولین ورود، اولین خدمت)",
             description: "شبیه‌سازی الگوریتم FCFS با نمایش جدول و نمودار گانت",
         },
         {
-            href: "/algorithms/spn",
+            href: "/blog/SPN",
             title: "SPN (کوتاه‌ترین فرایند بعدی)",
             description: "شبیه‌سازی SPN برای درک بهتر زمان‌های اجرا",
         },
         {
-            href: "/algorithms/hrrn",
+            href: "/blog/HRRN",
             title: "HRRN (بالاترین نسبت پاسخ به خدمت)",
             description: "شبیه‌سازی و تحلیل دقیق الگوریتم HRRN",
         },
     ];
     const preemptiveLinks = [
         {
-            href: "/algorithms/rr",
+            href: "/blog/RR",
             title: "RR (راند رابین)",
             description: "شبیه‌سازی الگوریتم RR با کوانتوم زمانی دلخواه",
         },
         {
-            href: "/algorithms/srtf",
+            href: "/blog/SRTF",
             title: "SRTF (کوتاه‌ترین زمان باقی‌مانده اول)",
             description: "تحلیل و اجرای الگوریتم SRTF برای فرآیندهای پویا",
         },

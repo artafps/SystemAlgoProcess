@@ -8,8 +8,8 @@ const person = {
   },
   role: "Design Engineer",
   avatar: "/images/avatar.jpg",
-  email: "example@gmail.com",
-  location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
+  email: "artafallahpoor@gmail.com",
+  location: "Iran", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
   languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
 };
 
@@ -29,18 +29,22 @@ const social = [
   // Import new icons in /once-ui/icons.ts
   {
     name: "GitHub",
+    icon: "github",
+    link: "https://github.com/artafps",
+  }, {
+    name: "Telegram",
     icon: "telegram",
-    link: "https://github.com/once-ui-system/nextjs-starter",
+    link: "https://t.me/artafps",
   },
   {
     name: "LinkedIn",
     icon: "linkedin",
-    link: "https://www.linkedin.com/company/once-ui/",
+    link: "https://www.linkedin.com/in/artafps/",
   },
   {
-    name: "X",
-    icon: "x",
-    link: "wadad",
+    name: "Instagram",
+    icon: "instagram",
+    link: "https://www.instagram.com/artafps/",
   },
   {
     name: "Email",

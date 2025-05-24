@@ -38,7 +38,7 @@ import {
 
 import { FaDiscord, FaGithub, FaLinkedin, FaX } from "react-icons/fa6";
 import {RiTelegram2Fill} from "react-icons/ri";
-import {BsBarChartSteps} from "react-icons/bs";
+import {BsBarChartSteps, BsInstagram} from "react-icons/bs";
 import {IoIosSettings} from "react-icons/io";
 
 export const iconLibrary: Record<string, IconType> = {
@@ -73,6 +73,7 @@ export const iconLibrary: Record<string, IconType> = {
   chart:BsBarChartSteps,
   setting2: IoIosSettings,
   linkedin: FaLinkedin,
+  instagram:BsInstagram,
   x: FaX,
   clipboard: HiClipboard,
   arrowUpRightFromSquare: HiArrowTopRightOnSquare,

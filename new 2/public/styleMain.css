@@ -62,6 +62,10 @@
     src: url('./fonts/woff2/ModamFaNumWeb-Black.woff2') format('woff2'),  /* FF39+,Chrome36+, Opera24+*/
     url('./fonts/woff/ModamFaNumWeb-Black.woff') format('woff');  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
 }
-body{
+body , div{
     font-family: ModamFaNumWeb !important;
+}
+code{
+    direction: ltr !important;
+    overflow:auto ;
 }

@@ -21,7 +21,7 @@ export const HeadingLink: React.FC<HeadingLinkProps> = ({ id, as, children, styl
       () => {
         addToast({
           variant: "success",
-          message: "Link copied to clipboard.",
+          message: "پیوند در کلیپ بورد کپی شد.",
         });
       },
       () => {
