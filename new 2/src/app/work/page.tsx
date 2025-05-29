@@ -2,11 +2,9 @@
 import {
   Badge,
   Button,
-  Card,
   Column,
   Feedback,
   Input,
-  NumberInput,
   useToast,
 } from "@/once-ui/components";
 import { baseURL } from "@/app/resources";
@@ -20,18 +18,95 @@ interface Process {
   pid: string;
   arrivalTime: number;
   burstTime: number;
+  color: {
+    name: string;
+    hex: string;
+  };
 }
 
 /** نوع فرم ورودی */
 type ProcessForm = Process;
 export default function Work() {
   const { addToast } = useToast();
+  function generateFancyColor() {
+    const nameParts1 = [
+      "Velvet",
+      "Blush",
+      "Dreamy",
+      "Golden",
+      "Crystal",
+      "Cotton",
+      "Moonlit",
+      "Fairy",
+      "Silky",
+      "Lavender",
+      "Snowy",
+      "Ocean",
+      "Peachy",
+      "Minty",
+      "Satin",
+    ];
+
+    const nameParts2 = [
+      "Rose",
+      "Mist",
+      "Glow",
+      "Sky",
+      "Cloud",
+      "Pearl",
+      "Twinkle",
+      "Whisper",
+      "Charm",
+      "Dust",
+      "Blossom",
+      "Frost",
+      "Cream",
+      "Breeze",
+      "Shine",
+    ];
+
+    // رنگ‌های متنوع با HSL (اشباع بالا، روشنایی متوسط)
+    const randomHex = () => {
+      const h = Math.floor(Math.random() * 360); // hue: 0–360 (رنگ کامل)
+      const s = Math.floor(70 + Math.random() * 30); // saturation: 70–100%
+      const l = Math.floor(40 + Math.random() * 20); // lightness: 40–60% (نه سفید نه سیاه)
+
+      // تبدیل HSL به RGB
+      const hslToHex = (h: number, s: number, l: number) => {
+        s /= 100;
+        l /= 100;
+        const k = (n: number) => (n + h / 30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n: number) =>
+          Math.round(
+            255 *
+              (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))))
+          );
+        return `#${[f(0), f(8), f(4)]
+          .map((x) => x.toString(16).padStart(2, "0"))
+          .join("")}`;
+      };
+
+      return hslToHex(h, s, l);
+    };
+
+    const name =
+      nameParts1[Math.floor(Math.random() * nameParts1.length)] +
+      " " +
+      nameParts2[Math.floor(Math.random() * nameParts2.length)];
+
+    return {
+      name,
+      hex: randomHex(),
+    };
+  }
 
   /* ---------- state ---------- */
   const [form, setForm] = useState<ProcessForm>({
     pid: "",
     arrivalTime: 1,
     burstTime: 1,
+    color: generateFancyColor(),
   });
 
   // مقدار اولیهٔ processes را خالی می‌گذاریم؛
@@ -99,7 +174,12 @@ export default function Work() {
     }
 
     // ایجاد فرایند جدید
-    const newProcess: Process = { pid, arrivalTime, burstTime };
+    const newProcess: Process = {
+      pid,
+      arrivalTime,
+      burstTime,
+      color: generateFancyColor(),
+    };
 
     setProcesses((prev) => [...prev, newProcess]);
     localStorage.setItem(
@@ -107,7 +187,12 @@ export default function Work() {
       JSON.stringify([...processes, newProcess])
     );
     // ریست فرم
-    setForm({ pid: "", arrivalTime: 0, burstTime: 0 });
+    setForm({
+      pid: "",
+      arrivalTime: 0,
+      burstTime: 0,
+      color: generateFancyColor(),
+    });
   };
   /* ---------- حذف ---------- */
   const handleDelete = (pid: string) => {
@@ -127,8 +212,6 @@ export default function Work() {
     });
     setForm(proc); // مقداردهی فرم برای ویرایش
   };
-  /* ---------- رندر ---------- */
-
   return (
     <Column maxWidth="m">
       <Schema
@@ -193,29 +276,39 @@ export default function Work() {
       <div className="space-y-2 mt-12">
         <h2 className="text-lg font-semibold mb-20">لیست فرایندها:</h2>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
           {processes.map((p) => (
             <div key={p.pid}>
               <Feedback title={`فرایند ${p.pid}`} description="">
                 <div style={{ display: "flex", gap: "10px" }}>
+                  <Badge title="رنگ" arrow={false}>
+                    <div
+                      style={{
+                        margin: "0px 10px 0px 0px",
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: 50,
+                        background: p.color.hex,
+                      }}
+                    />
+                  </Badge>
                   <Badge title={`زمان ورود: ${p.arrivalTime}`} arrow={false} />
                   <Badge title={`زمان اجرا: ${p.burstTime}`} arrow={false} />
                 </div>
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <Button
-                    
-                    variant="secondary"
-                    onClick={() => handleEdit(p)}
-                  >
+                  <Button variant="secondary" onClick={() => handleEdit(p)}>
                     ویرایش
                   </Button>
 
                   {/* دکمهٔ حذف */}
-                  <Button
-                    
-                    variant="danger"
-                    onClick={() => handleDelete(p.pid)}
-                  >
+                  <Button variant="danger" onClick={() => handleDelete(p.pid)}>
                     حذف
                   </Button>
                 </div>

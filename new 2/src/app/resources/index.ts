@@ -17,5 +17,5 @@ export {
   about,
   blog,
   work,
-  chart,
+  algo,
 } from "@/app/resources/content";

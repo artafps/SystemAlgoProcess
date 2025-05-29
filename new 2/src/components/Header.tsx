@@ -3,11 +3,20 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Fade, Flex, Line, ToggleButton } from "@/once-ui/components";
+import {
+  Button,
+  Fade,
+  Flex,
+  IconButton,
+  Line,
+  Row,
+  StyleOverlay,
+  ToggleButton,
+} from "@/once-ui/components";
 import styles from "@/components/Header.module.scss";
 
 import { routes, display } from "@/app/resources";
-import {person, about, blog, work,  chart} from "@/app/resources/content";
+import { person, about, blog, work, algo } from "@/app/resources/content";
 import { ThemeToggle } from "./ThemeToggle";
 
 type TimeDisplayProps = {
@@ -15,7 +24,10 @@ type TimeDisplayProps = {
   locale?: string; // Optionally allow locale, defaulting to 'en-GB'
 };
 
-const TimeDisplay: React.FC<TimeDisplayProps> = ({ timeZone, locale = "en-GB" }) => {
+const TimeDisplay: React.FC<TimeDisplayProps> = ({
+  timeZone,
+  locale = "en-GB",
+}) => {
   const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
@@ -49,7 +61,15 @@ export const Header = () => {
   return (
     <>
       <Fade hide="s" fillWidth position="fixed" height="80" zIndex={9} />
-      <Fade show="s" fillWidth position="fixed" bottom="0" to="top" height="80" zIndex={9} />
+      <Fade
+        show="s"
+        fillWidth
+        position="fixed"
+        bottom="0"
+        to="top"
+        height="80"
+        zIndex={9}
+      />
       <Flex
         fitHeight
         position="unset"
@@ -61,8 +81,20 @@ export const Header = () => {
         horizontal="center"
         data-border="rounded"
       >
-        <Flex paddingLeft="12" fillWidth vertical="center" textVariant="body-default-s">
-          {display.location && <Flex hide="s">{person.location}</Flex>}
+        <Flex
+          paddingLeft="12"
+          fillWidth
+          vertical="center"
+          textVariant="body-default-s"
+        >
+          <StyleOverlay
+            dir="ltr"
+            style={{ width: "auto", height: "500px", overflow: "auto" }}
+          >
+            <Row paddingTop="8" paddingRight="12">
+              <Button>Open</Button>
+            </Row>
+          </StyleOverlay>
         </Flex>
         <Flex fillWidth horizontal="center">
           <Flex
@@ -76,7 +108,11 @@ export const Header = () => {
           >
             <Flex gap="4" vertical="center" textVariant="body-default-s">
               {routes["/"] && (
-                <ToggleButton prefixIcon="home" href="/" selected={pathname === "/"} />
+                <ToggleButton
+                  prefixIcon="home"
+                  href="/"
+                  selected={pathname === "/"}
+                />
               )}
               <Line background="neutral-alpha-medium" vert maxHeight="24" />
 
@@ -114,20 +150,20 @@ export const Header = () => {
                   />
                 </>
               )}
-              {routes["/chart"] && (
+              {routes["/algo"] && (
                 <>
                   <ToggleButton
                     className="s-flex-hide"
                     prefixIcon="chart"
-                    href="/chart"
-                    label={chart.label}
-                    selected={pathname.startsWith("/chart")}
+                    href="/algo"
+                    label={algo.label}
+                    selected={pathname.startsWith("/algo")}
                   />
                   <ToggleButton
                     className="s-flex-show"
                     prefixIcon="chart"
-                    href="/chart"
-                    selected={pathname.startsWith("/chart")}
+                    href="/algo"
+                    selected={pathname.startsWith("/algo")}
                   />
                 </>
               )}
@@ -140,6 +176,7 @@ export const Header = () => {
             </Flex>
           </Flex>
         </Flex>
+
         <Flex fillWidth horizontal="end" vertical="center">
           <Flex
             paddingRight="12"
@@ -148,7 +185,9 @@ export const Header = () => {
             textVariant="body-default-s"
             gap="20"
           >
-            <Flex hide="s">{display.time && <TimeDisplay timeZone={person.location} />}</Flex>
+            <Flex hide="s">
+              {display.time && <TimeDisplay timeZone={person.location} />}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
