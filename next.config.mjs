@@ -1,10 +1,3 @@
-import mdx from "@next/mdx";
-
-const withMDX = mdx({
-  extension: /\.mdx?$/,
-  options: {},
-});
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
@@ -19,6 +12,18 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  webpack(config, options) {
+    config.module.rules.push({
+      test: /\.mdx?$/,
+      use: [
+        options.defaultLoaders.babel,
+        {
+          loader: '@mdx-js/loader',
+        },
+      ],
+    });
+    return config;
+  },
 };
 
-export default withMDX(nextConfig);
+export default nextConfig;
