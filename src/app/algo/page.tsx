@@ -74,7 +74,12 @@ export default function Algo() {
   }
   const data = loadProcessesFromLocalStorage();
   const scheduler = new CPUScheduler();
-  scheduler.setProcesses((data.processes.length>0 ? data.processes:[[3,3]]) as [number, number][]);
+  scheduler.setProcesses(
+    (data.processes.length > 0 ? data.processes : [[3, 3]]) as [
+      number,
+      number
+    ][]
+  );
   scheduler.setContextSwitchTime(valuecst);
   scheduler.setTimeQuantum(valuetq);
   const results = scheduler.runAllAlgorithms();
@@ -96,7 +101,7 @@ export default function Algo() {
 
   const options = {
     chart: {
-      type: "bar"  ,
+      type: "bar",
       height: 350,
       zoom: {
         enabled: false,
@@ -138,28 +143,18 @@ export default function Algo() {
       },
     },
   };
-
   type GanttEvent = {
-    type: "execution" | "idle"; // یا هر نوع دیگه‌ای که استفاده می‌کنی
-    process?: number; // فقط در حالت execution وجود دارد
     start: number;
     end: number;
-  };
-
-  type ProcessResult = {
-    pid: number;
-    waitingTime: number;
-    turnaroundTime: number;
-    responseTime: number;
-    completionTime: number;
+    process: number; // -1 for context switch
+    type: "arrival" | "execution" | "context_switch";
   };
 
   type AlgorithmResult = {
     gantt: GanttEvent[];
-    processes: ProcessResult[]; // نتایج هر فرآیند
-    averageWaitingTime: number;
-    averageTurnaroundTime: number;
-    averageResponseTime: number;
+    wt: number[];
+    tt: number[];
+    rt: number[];
   };
 
   function convertResultToSeries(
@@ -240,6 +235,7 @@ export default function Algo() {
         })
         .map((item, idx) => {
           const { algorithm, result, averages } = item;
+          console.log(item.result);
           const series = convertResultToSeries(item.result);
           const processColors = data.colors;
           const op = {
