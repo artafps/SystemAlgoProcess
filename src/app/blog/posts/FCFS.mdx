@@ -1,0 +1,74 @@
+---
+title: "آشنایی با الگوریتم زمان‌بندی FCFS"
+summary: "الگوریتم FCFS (اولین ورود، اولین سرویس) ساده‌ترین سیاست زمان‌بندی در سیستم‌های عامل است."
+publishedAt: "2025-05-18"
+tag: "الگوریتم‌های زمان‌بندی"
+---
+
+import { CodeBlock } from "@/components/CodeBlock"
+
+## الگوریتم FCFS چیست؟
+
+**FCFS | First‑Come, First‑Served** پردازش‌ها را دقیقاً به ترتیب ورود اجرا می‌کند.
+
+---
+
+## A مثال
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `شناسه   زمان ورود   زمان اجرا
+P1       0          6
+P2       1          8
+P3       2          7
+P4       3          3`,
+      language: "plaintext",
+      label: "جدول پردازش‌ها"
+    }
+  ]}
+/>
+
+---
+
+## B اجرای گام‌به‌گام
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `P1 → P2 → P3 → P4`,
+      language: "plaintext",
+      label: "ترتیب اجرا"
+    }
+  ]}
+/>
+
+---
+
+## C کد جاوااسکریپت
+
+<CodeBlock
+  codeInstances={[
+    {
+      code: `function fcfsSchedule(processes) {
+  processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
+  let time = 0;
+  return processes.map(p => {
+    if (time < p.arrivalTime) time = p.arrivalTime;
+    const start = time;
+    time += p.burstTime;
+    return { ...p, start, end: time };
+  });
+}`,
+      language: "javascript",
+      label: "کد FCFS"
+    }
+  ]}
+/>
+
+---
+
+## D جمع‌بندی
+
+FCFS به دلیل **سادگی** کاربرد آموزشی زیادی دارد، ولی در بارهای متنوع ممکن است زمان انتظار را افزایش دهد.
