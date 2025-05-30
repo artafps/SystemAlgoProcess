@@ -125,7 +125,6 @@ export default function Home() {
         <Row maxWidth="32" borderTop="neutral-alpha-weak" borderBottom="neutral-medium" />
         <Row fillWidth border="neutral-alpha-weak" mobileDirection="column">
             {preemptiveLinks.map((link, index) => {
-            console.log(link);
             return(
                 <Card
                     key={link.href}

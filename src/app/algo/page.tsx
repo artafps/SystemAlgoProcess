@@ -235,7 +235,6 @@ export default function Algo() {
         })
         .map((item, idx) => {
           const { algorithm, result, averages } = item;
-          console.log(item.result);
           const series = convertResultToSeries(item.result);
           const processColors = data.colors;
           const op = {
@@ -352,25 +351,7 @@ export default function Algo() {
 
                 <Column fillWidth paddingX="20" paddingY="24" gap="12">
                   {/* Process Metrics */}
-                  <Column gap="8">
-                    <h2>Process Metrics | ماتریس فرآیندها</h2>
-                    <Table
-                      data={{
-                        headers: [
-                          { content: "Process", key: "process" },
-                          { content: "Wait Time", key: "wt" },
-                          { content: "Turnaround Time", key: "tt" },
-                          { content: "Response Time", key: "rt" },
-                        ],
-                        rows: result.wt.map((_, i) => [
-                          `P${i + 1}`,
-                          result.wt[i],
-                          result.tt[i],
-                          result.rt[i],
-                        ]),
-                      }}
-                    />
-                  </Column>
+                  
 
                   {series.length > 0 ? (
                     <Chart
@@ -464,7 +445,25 @@ export default function Algo() {
                     </Card>
                   </Row>
                 </Column>
-
+<Column gap="8">
+                    <h2>Process Metrics | ماتریس فرآیندها</h2>
+                    <Table
+                      data={{
+                        headers: [
+                          { content: "Process", key: "process" },
+                          { content: "Wait Time", key: "wt" },
+                          { content: "Turnaround Time", key: "tt" },
+                          { content: "Response Time", key: "rt" },
+                        ],
+                        rows: result.wt.map((_, i) => [
+                          `P${i + 1}`,
+                          result.wt[i],
+                          result.tt[i],
+                          result.rt[i],
+                        ]),
+                      }}
+                    />
+                  </Column>
                 <Line background="neutral-alpha-medium" />
               </div>
             </div>

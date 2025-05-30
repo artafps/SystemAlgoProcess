@@ -381,7 +381,6 @@ export class CPUScheduler {
             type: "execution",
           });
         }
-        console.log(currentProcess);
 
         // اگر زمان پاسخ این فرآیند هنوز ثبت نشده، ثبت کن
         if (rt[nextProcess] === -1) {
@@ -479,5 +478,4 @@ scheduler.setContextSwitchTime(2);
 scheduler.setTimeQuantum(5);
 
 const results = scheduler.runAllAlgorithms();
-console.log(results);
 */
