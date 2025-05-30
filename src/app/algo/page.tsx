@@ -96,7 +96,7 @@ export default function Algo() {
 
   const options = {
     chart: {
-      type: "bar",
+      type: "bar"  ,
       height: 350,
       zoom: {
         enabled: false,
@@ -219,7 +219,7 @@ export default function Algo() {
           <h1>مقایسه عملکرد الگوریتم</h1>
           <div className="h-96 w-full">
             <Chart
-              options={options}
+              options={options as object}
               series={series}
               height={350}
               width={"100%"}
@@ -378,7 +378,7 @@ export default function Algo() {
 
                   {series.length > 0 ? (
                     <Chart
-                      options={op}
+                      options={op as object}
                       series={series}
                       height={600}
                       width={"100%"}
