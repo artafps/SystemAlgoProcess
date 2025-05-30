@@ -13,12 +13,9 @@ import {
     TiltFx,
     Background, Card, Icon
 } from "@/once-ui/components";
-import { Projects } from "@/components/work/Projects";
 
 import { baseURL, routes } from "@/app/resources";
 import { home, about, person, newsletter } from "@/app/resources/content";
-import { Mailchimp } from "@/components";
-import { Posts } from "@/components/blog/Posts";
 import {CodeBlock, Meta, Schema} from "@/once-ui/modules";
 
 export async function generateMetadata() {
@@ -127,7 +124,9 @@ export default function Home() {
         <Row fillWidth overflow="hidden">
         <Row maxWidth="32" borderTop="neutral-alpha-weak" borderBottom="neutral-medium" />
         <Row fillWidth border="neutral-alpha-weak" mobileDirection="column">
-            {preemptiveLinks.map((link, index) => (
+            {preemptiveLinks.map((link, index) => {
+            console.log(link);
+            return(
                 <Card
                     key={link.href}
                     fillWidth
@@ -136,7 +135,6 @@ export default function Home() {
                     gap="8"
                     background="page"
                     direction="column"
-                    borderRight={index < link.length - 1 ? "neutral-alpha-weak" : undefined}
                     border={undefined}
                 >
                     <Row fillWidth center gap="12">
@@ -149,7 +147,7 @@ export default function Home() {
                         {link.description}
                     </Text>
                 </Card>
-            ))}
+            )})}
         </Row>
         <Row maxWidth="32" borderTop="neutral-alpha-weak" borderBottom="neutral-medium" />
     </Row>
@@ -165,7 +163,6 @@ export default function Home() {
                         gap="8"
                         background="page"
                         direction="column"
-                        borderRight={index < link.length - 1 ? "neutral-alpha-weak" : undefined}
                         border={undefined}
                     >
                         <Row fillWidth center gap="12">
